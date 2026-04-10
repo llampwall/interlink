@@ -58,6 +58,7 @@ import {
   getAllowedAttachmentOptions,
   getMediaFilename,
   getMediaHash,
+  getWebPagePhoto,
   getMessageDocumentPhoto,
   getMessagePhoto,
   getReactionKey,
@@ -126,6 +127,7 @@ import focusEditableElement from '../../util/focusEditableElement';
 import { formatStarsAsIcon } from '../../util/localization/format';
 import { fetch } from '../../util/mediaLoader';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
+import { findSocialUrl } from '../../util/fetchExtract';
 import parseHtmlAsFormattedText from '../../util/parseHtmlAsFormattedText';
 import { insertHtmlInSelection } from '../../util/selection';
 import { getServerTime } from '../../util/serverTime';
@@ -146,6 +148,9 @@ import useTimeout from '../../hooks/schedulers/useTimeout';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useDerivedState from '../../hooks/useDerivedState';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
+import useThumbnail from '../../hooks/media/useThumbnail';
+import useMedia from '../../hooks/useMedia';
+import useFetchExtract from '../../hooks/useFetchExtract';
 import useFlag from '../../hooks/useFlag';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import useGetSelectionRange from '../../hooks/useGetSelectionRange';
@@ -497,6 +502,14 @@ const Composer = ({
   const storyReactionRef = useRef<HTMLButtonElement>();
 
   const [getHtml, setHtml] = useSignal('');
+  const {
+    fetchStatus, fetchPlatform, fetchThumbnail, consumeResult: consumeFetchResult,
+  } = useFetchExtract(getHtml);
+  const fetchPreviewPhoto = getWebPagePhoto(webPagePreview);
+  const fetchThumbUrl = useThumbnail(fetchPreviewPhoto ? { content: webPagePreview! } : undefined);
+  const fetchMediaHash = fetchPreviewPhoto ? getMediaHash(fetchPreviewPhoto, 'pictogram') : undefined;
+  const fetchMediaUrl = useMedia(fetchMediaHash);
+  const fetchThumb = fetchMediaUrl || fetchThumbUrl || fetchThumbnail;
   const [isMounted, setIsMounted] = useState(false);
   const getSelectionRange = useGetSelectionRange(editableInputCssSelector);
   const lastMessageSendTimeSeconds = useRef<number>();
@@ -1307,6 +1320,26 @@ const Composer = ({
           blob,
           { voice: { duration, waveform }, ttlSeconds },
         )];
+      }
+    }
+
+    // Fetch: use pre-fetched media from optimistic extraction
+    if (!currentAttachments.length) {
+      const extraction = consumeFetchResult();
+      if (extraction) {
+        currentAttachments = extraction.attachments;
+        // Replace the bare URL with a short clickable [link] in the caption
+        const { text } = parseHtmlAsFormattedText(getHtml());
+        const socialUrl = findSocialUrl(text);
+        if (socialUrl) {
+          const html = getHtml();
+          setHtml(html.replace(socialUrl, `<a href="${socialUrl}">[link]</a>`));
+        }
+        console.log(`[Fetch] Sending as ${extraction.platform} media (${currentAttachments.length} item(s))`);
+      } else if (fetchStatus === 'loading') {
+        // Extraction still in progress — let user know
+        showNotification({ message: 'Still fetching media... try again in a moment' });
+        return;
       }
     }
 
@@ -2178,12 +2211,41 @@ const Composer = ({
               threadId={threadId}
               messageListType={messageListType}
             />
-            <WebPagePreview
-              chatId={chatId}
-              threadId={threadId}
-              isDisabled={!canAttachEmbedLinks || hasAttachments || !hasText}
-              isEditing={Boolean(editingMessage)}
-            />
+            {fetchStatus !== 'idle' ? (
+              <div style="display:flex;align-items:center;gap:0.625rem;padding:0.5rem 1rem">
+                {fetchThumb && (
+                  <img
+                    src={fetchThumb}
+                    alt=""
+                    style="width:2.5rem;height:2.5rem;border-radius:0.25rem;object-fit:cover;flex-shrink:0"
+                  />
+                )}
+                <div style="display:flex;flex-direction:column;gap:0.125rem;min-width:0">
+                  {fetchStatus === 'loading' && (
+                    <span style="font-size:0.8125rem;opacity:0.7">
+                      Fetching media{fetchPlatform ? ` from ${fetchPlatform}` : ''}...
+                    </span>
+                  )}
+                  {fetchStatus === 'ready' && (
+                    <span style="font-size:0.8125rem;color:#4caf50">
+                      Media ready to send{fetchPlatform ? ` from ${fetchPlatform}` : ''}
+                    </span>
+                  )}
+                  {fetchStatus === 'error' && (
+                    <span style="font-size:0.8125rem;opacity:0.5">
+                      Could not extract media — will send as link
+                    </span>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <WebPagePreview
+                chatId={chatId}
+                threadId={threadId}
+                isDisabled={!canAttachEmbedLinks || hasAttachments || !hasText}
+                isEditing={Boolean(editingMessage)}
+              />
+            )}
           </>
         )}
         <div className={buildClassName('message-input-wrapper', peerColorClass)} style={peerColorStyle}>
