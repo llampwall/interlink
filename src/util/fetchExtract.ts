@@ -6,8 +6,8 @@
 
 import type { ApiAttachment } from '../api/types';
 
-// TODO: make configurable via .env
-const FETCH_API_URL = 'http://localhost:8444';
+// Relative URLs — proxied through serve.cjs in production
+const FETCH_API_URL = '';
 
 const SOCIAL_URL_RE = /https?:\/\/(?:www\.)?(?:instagram\.com\/(?:p|reel|reels|stories)\/[\w-]+|(?:x\.com|twitter\.com)\/\w+\/status\/\d+|tiktok\.com\/@[\w.]+\/video\/\d+|(?:vm\.)?tiktok\.com\/[\w]+|(?:m\.)?youtube\.com\/(?:watch\?[\w=&]+|shorts\/[\w-]+)|youtu\.be\/[\w-]+|(?:old\.)?reddit\.com\/r\/\w+\/(?:comments|s)\/[\w]+|v\.redd\.it\/[\w]+|i\.redd\.it\/[\w.]+)[/\w\-?=&%.]*/i;
 
