@@ -1,0 +1,59 @@
+name: Sync upstream
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: master
+
+      - name: Fetch upstream
+        run: |
+          git remote add upstream https://github.com/Ajaxy/telegram-tt.git
+          git fetch upstream master
+
+      - name: Check for updates
+        id: updates
+        run: |
+          if git merge-base --is-ancestor upstream/master HEAD; then
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Merge upstream
+        if: steps.updates.outputs.available == 'true'
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git merge --no-ff --no-edit upstream/master
+
+      - name: Setup Node.js
+        if: steps.updates.outputs.available == 'true'
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Validate
+        if: steps.updates.outputs.available == 'true'
+        run: |
+          npm ci
+          npm run check
+          npm test
+          npm run build:production
+
+      - name: Push
+        if: steps.updates.outputs.available == 'true'
+        run: git push origin HEAD:master
