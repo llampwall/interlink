@@ -24,6 +24,7 @@ import {
   selectCurrentMessageList,
   selectCustomEmoji,
   selectIsChatWithSelf,
+  selectMainChatFolder,
   selectNotifyDefaults,
   selectNotifyException,
   selectPeer,
@@ -35,8 +36,10 @@ import { callApi } from '../api/gramjs';
 import { IS_TAURI } from './browser/globalEnvironment';
 import { IS_SERVICE_WORKER_SUPPORTED, IS_TOUCH_ENV } from './browser/windowEnvironment';
 import jsxToHtml from './element/jsxToHtml';
+import { getOrderedIds } from './folderManager';
 import { buildCollectionByKey } from './iteratees';
 import { getTranslationFn } from './localization';
+import { isChatInMainFolder } from './mainFolder';
 import * as mediaLoader from './mediaLoader';
 import { oldTranslate } from './oldLangProvider';
 import { debounce } from './schedulers';
@@ -419,6 +422,9 @@ export async function notifyAboutMessage({
   isReaction = false,
 }: { chat: ApiChat; message: Partial<ApiMessage>; isReaction?: boolean }) {
   const global = getGlobal();
+  const mainFolder = selectMainChatFolder(global);
+  if (!mainFolder || !isChatInMainFolder(getOrderedIds(mainFolder.id), chat.id)) return;
+
   const { hasWebNotifications } = selectSettingsKeys(global);
   if (!checkIfShouldNotify(chat, message)) return;
   const isChatSilent = getIsChatSilent(

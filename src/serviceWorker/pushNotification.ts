@@ -50,6 +50,26 @@ type CloseNotificationData = {
 let lastSyncAt = new Date().valueOf();
 const shownNotifications = new Set();
 const clickBuffer: Record<string, NotificationData> = {};
+const ALLOWED_CHAT_IDS_CACHE = 'interlink-main-notifications';
+const ALLOWED_CHAT_IDS_KEY = new URL('allowed-chat-ids', self.registration.scope).href;
+
+async function setAllowedChatIds(chatIds: string[]) {
+  const cache = await self.caches.open(ALLOWED_CHAT_IDS_CACHE);
+  await cache.put(ALLOWED_CHAT_IDS_KEY, new Response(JSON.stringify(chatIds)));
+}
+
+async function isNotificationAllowed(chatId?: string) {
+  if (!chatId) return false;
+
+  try {
+    const cache = await self.caches.open(ALLOWED_CHAT_IDS_CACHE);
+    const response = await cache.match(ALLOWED_CHAT_IDS_KEY);
+    const chatIds = response ? await response.json() as string[] : [];
+    return chatIds.includes(chatId);
+  } catch {
+    return false;
+  }
+}
 
 function getPushData(e: PushEvent | Notification): PushData | undefined {
   try {
@@ -188,7 +208,10 @@ export function handlePush(e: PushEvent) {
     return;
   }
 
-  e.waitUntil(showNotification(notification));
+  e.waitUntil((async () => {
+    if (!await isNotificationAllowed(notification.chatId)) return;
+    await showNotification(notification);
+  })());
 }
 
 async function focusChatMessage(client: WindowClient, data: FocusMessageData) {
@@ -261,6 +284,8 @@ export function handleClientMessage(e: ExtendableMessageEvent) {
     // store messageId for already shown notification
     const notification: NotificationData = e.data.payload;
     e.waitUntil((async () => {
+      if (!await isNotificationAllowed(notification.chatId)) return;
+
       // Close existing notification if it is already shown
       if (notification.chatId) {
         const notifications = await self.registration.getNotifications({ tag: notification.chatId });
@@ -270,6 +295,10 @@ export function handleClientMessage(e: ExtendableMessageEvent) {
       shownNotifications.add(notification.messageId);
       return showNotification(notification);
     })());
+  }
+
+  if (e.data.type === 'setAllowedNotificationChatIds') {
+    e.waitUntil(setAllowedChatIds(e.data.payload));
   }
 
   if (e.data.type === 'closeMessageNotifications') {

@@ -10,6 +10,7 @@ import {
 import { IS_TRANSLATION_SUPPORTED } from '../../util/browser/windowEnvironment';
 import { isUserId } from '../../util/entities/ids';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
+import { findMainChatFolder } from '../../util/mainFolder';
 import {
   getHasAdminRight,
   isChatAdmin,
@@ -150,6 +151,10 @@ export function selectChatListType<T extends GlobalState>(
 
 export function selectChatFolder<T extends GlobalState>(global: T, folderId: number) {
   return global.chatFolders.byId[folderId];
+}
+
+export function selectMainChatFolder<T extends GlobalState>(global: T) {
+  return findMainChatFolder(Object.values(global.chatFolders.byId));
 }
 
 export function selectIsChatPinned<T extends GlobalState>(

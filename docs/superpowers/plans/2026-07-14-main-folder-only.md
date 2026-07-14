@@ -13,26 +13,27 @@
 ### Task 1: Resolve the Main folder
 
 **Files:**
+- Create: `src/util/mainFolder.ts`
+- Test: `src/util/mainFolder.test.ts`
 - Modify: `src/global/selectors/chats.ts`
-- Test: `src/global/selectors/chats.test.ts`
 
 - [ ] **Step 1: Write a failing selector test**
 
-Create a minimal global-state fixture with folders titled `Personal` and `MAIN`. Assert that `selectMainChatFolder` returns `MAIN`, and assert that a fixture without it returns `undefined`.
+Create minimal folders titled `Personal` and `MAIN`. Assert that `findMainChatFolder` returns `MAIN`, and assert that a list without it returns `undefined`.
 
 - [ ] **Step 2: Run the focused test and confirm failure**
 
-Run: `npm test -- src/global/selectors/chats.test.ts`
+Run: `npx vitest run --silent=true src/util/mainFolder.test.ts`
 
-Expected: FAIL because `selectMainChatFolder` is not exported.
+Expected: FAIL because `src/util/mainFolder.ts` does not exist.
 
 - [ ] **Step 3: Implement the selector**
 
-Add `selectMainChatFolder(global)` beside `selectChatFolder`. It returns the first folder whose `title.text.trim().toLowerCase()` equals `main`.
+Add the tested pure `findMainChatFolder` helper, then add `selectMainChatFolder(global)` beside `selectChatFolder` and delegate to it.
 
 - [ ] **Step 4: Run the focused test**
 
-Run: `npm test -- src/global/selectors/chats.test.ts`
+Run: `npx vitest run --silent=true src/util/mainFolder.test.ts`
 
 Expected: PASS.
 
@@ -41,6 +42,7 @@ Expected: PASS.
 **Files:**
 - Modify: `src/components/left/main/ChatFolders.tsx`
 - Modify: `src/components/main/FoldersSidebar.tsx`
+- Modify: `src/global/actions/api/chats.ts`
 
 - [ ] **Step 1: Restrict both layouts**
 
@@ -54,7 +56,11 @@ In `ChatFolders`, avoid rendering `Transition` when the resolved list has no tab
 
 Subscribe to the main folder's existing ordered IDs with `useFolderManagerForOrderedIds`. Post `{ type: 'setAllowedNotificationChatIds', payload: orderedIds }` to the ready service worker whenever membership changes. Post an empty list when `main` is missing.
 
-- [ ] **Step 4: Run the TypeScript check**
+- [ ] **Step 4: Block alternate navigation paths**
+
+Use the same tested membership helper in the shared `openChat` action, remove folder tags, and close a cached current chat when it is outside `main` after membership loads.
+
+- [ ] **Step 5: Run the TypeScript check**
 
 Run: `npm run check:ts`
 
@@ -91,8 +97,9 @@ Expected: all tests pass.
 ### Task 4: Production verification and commit
 
 **Files:**
-- Inspect: `src/components/middle/composer/MessageInput.tsx`
-- Inspect: `src/components/middle/composer/FetchMediaModal.tsx`
+- Inspect: `src/components/common/Composer.tsx`
+- Inspect: `src/hooks/useFetchExtract.ts`
+- Inspect: `src/util/fetchExtract.ts`
 
 - [ ] **Step 1: Build production assets**
 
@@ -102,7 +109,7 @@ Expected: exit 0 and a compiled service-worker bundle in `dist`.
 
 - [ ] **Step 2: Confirm Fetch remains wired**
 
-Run: `rg -n "FetchMediaModal|openFetchMediaModal|fetchMedia" src/components/middle/composer src/global`
+Run: `rg -n "useFetchExtract|consumeFetchResult|extractAndBuildAttachments" src/components/common/Composer.tsx src/hooks/useFetchExtract.ts src/util/fetchExtract.ts`
 
 Expected: the composer action and modal remain connected and TypeScript-compiled.
 
@@ -119,4 +126,3 @@ Expected: only the feature files, plan/spec, and pre-existing generated artifact
 - [ ] **Step 4: Commit and push**
 
 Stage only the feature source, test, spec, and plan files. Commit with `feat: focus Interlink on main folder`, then push the current branch without rewriting history.
-

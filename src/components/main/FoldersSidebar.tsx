@@ -5,7 +5,7 @@ import type { ApiChatFolder, ApiChatlistExportedInvite } from '../../api/types';
 import { LeftColumnContent, SettingsScreens } from '../../types';
 
 import { requestMeasure, requestMutation } from '../../lib/fasterdom/fasterdom';
-import { selectTabState } from '../../global/selectors';
+import { selectMainChatFolder, selectTabState } from '../../global/selectors';
 import { selectCurrentLimit } from '../../global/selectors/limits';
 import { IS_TAURI } from '../../util/browser/globalEnvironment';
 import { IS_MAC_OS } from '../../util/browser/windowEnvironment';
@@ -208,16 +208,16 @@ export default memo(withGlobal(
     const {
       chatFolders: {
         byId: chatFoldersById,
-        orderedIds: orderedFolderIds,
         invites: folderInvitesById,
       },
     } = global;
+    const mainFolder = selectMainChatFolder(global);
     const { activeChatFolder } = selectTabState(global);
 
     return {
       chatFoldersById,
       folderInvitesById,
-      orderedFolderIds,
+      orderedFolderIds: mainFolder ? [mainFolder.id] : [],
       activeChatFolder,
       maxFolders: selectCurrentLimit(global, 'dialogFilters'),
       maxFolderInvites: selectCurrentLimit(global, 'chatlistInvites'),

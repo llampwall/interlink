@@ -43,6 +43,7 @@ import {
   buildCollectionByKey, omit, unique,
 } from '../../../util/iteratees';
 import { isLocalMessageId } from '../../../util/keys/messageKey';
+import { isChatInMainFolder } from '../../../util/mainFolder';
 import * as langProvider from '../../../util/oldLangProvider';
 import { debounce, pause, throttle } from '../../../util/schedulers';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
@@ -123,6 +124,7 @@ import {
   selectIsChatWithSelf,
   selectIsCurrentUserFrozen,
   selectLastServiceNotification,
+  selectMainChatFolder,
   selectPeer,
   selectPeerFullInfo,
   selectSimilarChannelIds,
@@ -220,6 +222,11 @@ addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
     id, type, noForumTopicPanel, shouldReplaceHistory, shouldReplaceLast,
     tabId = getCurrentTabId(),
   } = payload;
+
+  if (id && id !== TMP_CHAT_ID) {
+    const mainFolder = selectMainChatFolder(global);
+    if (!mainFolder || !isChatInMainFolder(getOrderedIds(mainFolder.id), id)) return;
+  }
 
   actions.processOpenChatOrThread({
     chatId: id,
