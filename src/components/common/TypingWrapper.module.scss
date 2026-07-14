@@ -3,7 +3,6 @@
   --typing-draft-spread: 10%;
 
   display: inline;
-
   mask-image:
     linear-gradient(
       to right,
@@ -19,6 +18,11 @@
         transparent calc(var(--typing-draft-progress) + var(--typing-draft-spread))
       );
   }
+}
+
+.fullyRevealed {
+  --typing-draft-progress: 100%;
+  --typing-draft-spread: 0%;
 }
 
 .placeholder {

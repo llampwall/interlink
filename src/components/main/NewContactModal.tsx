@@ -28,8 +28,6 @@ import TextArea from '../ui/TextArea';
 
 import './NewContactModal.scss';
 
-const ANIMATION_DURATION = 200;
-
 export type OwnProps = {
   isOpen: boolean;
   userId?: string;
@@ -86,9 +84,7 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     if (!IS_TOUCH_ENV && isShown) {
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, ANIMATION_DURATION);
+      inputRef.current?.focus();
     }
   }, [isShown]);
 
@@ -199,7 +195,7 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
           onCheck={setShouldSharePhoneNumber}
           label={oldLang('lng_new_contact_share')}
         />
-        <p className="NewContactModal__help-text NewContactModal__help-text__negative">
+        <p className="NewContactModal__help-text">
           {renderText(oldLang('AddContact.SharedContactExceptionInfo', renderingUser?.firstName))}
         </p>
       </>

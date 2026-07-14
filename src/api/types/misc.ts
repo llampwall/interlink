@@ -1,7 +1,15 @@
 import type { CallbackAction } from '../../global/types';
 import type { IconName } from '../../types/icons';
 import type { LangFnParameters, RegularLangFnParameters } from '../../util/localization';
-import type { ApiDocument, ApiFormattedText, ApiMessageEntity, ApiPhoto, ApiReaction, ApiVideo } from './messages';
+import type {
+  ApiContact,
+  ApiDocument,
+  ApiFormattedText,
+  ApiMessageEntity,
+  ApiPhoto,
+  ApiReaction,
+  ApiVideo,
+} from './messages';
 import type { ApiPremiumSection } from './payments';
 import type { ApiBotVerification } from './peers';
 import type { ApiStarsSubscriptionPricing } from './stars';
@@ -143,8 +151,30 @@ export type ApiNotification = {
   messageEntities?: undefined;
 });
 
+export type ApiDialogError = {
+  type: 'error';
+} & ApiError;
+
+export type ApiDialogMessage = {
+  type: 'message';
+  text: ApiFormattedText;
+};
+
+export type ApiDialogContact = {
+  type: 'contact';
+  contact: ApiContact;
+};
+
+export type ApiDialogLocalizedMessage = {
+  type: 'localized';
+  text: LangFnParameters;
+};
+
+export type ApiDialog = ApiDialogError | ApiDialogMessage | ApiDialogContact | ApiDialogLocalizedMessage;
+
 export type ApiError = {
   message: string;
+  code?: number;
   entities?: ApiMessageEntity[];
   hasErrorKey?: boolean;
   isSlowMode?: boolean;
@@ -222,6 +252,7 @@ export interface ApiAppConfig {
   autologinDomains: string[];
   urlAuthDomains: string[];
   whitelistedDomains: string[];
+  webAppAllowedProtocols: string[];
   premiumInvoiceSlug?: string;
   premiumBotUsername: string;
   isPremiumPurchaseBlocked: boolean;
@@ -283,7 +314,10 @@ export interface ApiAppConfig {
   tonStargiftResaleCommissionPermille?: number;
   tonUsdRate?: number;
   tonTopupUrl: string;
-  pollMaxAnswers?: number;
+  pollMaxAnswers: number;
+  pollClosePeriodMax: number;
+  pollCountriesMax: number;
+  phoneCountryIso2?: string;
   todoItemsMax: number;
   todoTitleLengthMax: number;
   todoItemLengthMax: number;
@@ -293,6 +327,7 @@ export interface ApiAppConfig {
   verifyAgeCountry?: string;
   verifyAgeMin?: number;
   typingDraftTtl: number;
+  isMessagePrimaryEditedDateEnabled: boolean;
   contactNoteLimit?: number;
   whitelistedBotIds?: string[];
   arePasskeysAvailable: boolean;
@@ -302,6 +337,9 @@ export interface ApiAppConfig {
     value: number;
     frameStart: number;
   }>;
+  aiComposeToneExamplesNum?: number;
+  aiComposeToneTitleLengthMax?: number;
+  aiComposeTonePromptLengthMax?: number;
 }
 
 export interface ApiConfig {
@@ -314,7 +352,25 @@ export interface ApiConfig {
   maxMessageLength: number;
   editTimeLimit: number;
   maxForwardedCount: number;
+  ratingEDecay: number;
 }
+
+export type ApiTopPeerCategory = 'correspondents' | 'botsInline' | 'botsApp' | 'botsGuestChat';
+
+export type ApiTopPeer = {
+  peerId: string;
+  rating: number;
+};
+
+export type ApiTopPeersResult = {
+  type: 'topPeers';
+  category: ApiTopPeerCategory;
+  topPeers: ApiTopPeer[];
+} | {
+  type: 'unchanged';
+} | {
+  type: 'disabled';
+};
 
 export interface ApiPromoData {
   expires: number;
@@ -352,6 +408,7 @@ export type ApiUrlAuthResultRequest = {
   type: 'request';
   bot: ApiUser;
   domain: string;
+  isApp?: boolean;
   shouldRequestWriteAccess?: boolean;
   shouldRequestPhoneNumber?: boolean;
   browser?: string;
@@ -361,6 +418,7 @@ export type ApiUrlAuthResultRequest = {
   matchCodes?: string[];
   matchCodesFirst?: boolean;
   userIdHint?: string;
+  verifiedAppName?: string;
 };
 
 type ApiUrlAuthResultAccepted = {
@@ -407,15 +465,17 @@ export type ApiLimitType =
   | 'recommendedChannels'
   | 'savedDialogsPinned'
   | 'maxReactions'
-  | 'moreAccounts';
+  | 'moreAccounts'
+  | 'aiComposeToneSaved';
 
 export type ApiLimitTypeWithModal = Exclude<ApiLimitType, (
   'captionLength' | 'aboutLength' | 'stickersFaved' | 'savedGifs' | 'recommendedChannels' | 'moreAccounts'
-  | 'maxReactions'
+  | 'maxReactions' | 'aiComposeToneSaved'
 )>;
 
 export type ApiLimitTypeForPromo = Exclude<ApiLimitType,
-'uploadMaxFileparts' | 'chatlistInvites' | 'chatlistJoined' | 'savedDialogsPinned' | 'maxReactions'
+  'uploadMaxFileparts' | 'chatlistInvites' | 'chatlistJoined' | 'savedDialogsPinned' | 'maxReactions'
+  | 'aiComposeToneSaved'
 >;
 
 export type ApiPeerNotifySettings = {

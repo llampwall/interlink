@@ -49,6 +49,8 @@ export interface ApiUser {
   paidMessagesStars?: number;
   isBotForum?: boolean;
   canManageBotForumTopics?: boolean;
+  isGuestChatBot?: boolean;
+  isGuardBot?: boolean;
 }
 
 export interface ApiUserFullInfo {
@@ -87,6 +89,7 @@ export interface ApiUserFullInfo {
   note?: ApiFormattedText;
   noForwardsMyEnabled?: boolean;
   noForwardsPeerEnabled?: boolean;
+  isUnofficialSecurityRisk?: boolean;
 }
 
 export type ApiUserType = 'userTypeBot' | 'userTypeRegular' | 'userTypeDeleted' | 'userTypeUnknown';

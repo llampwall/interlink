@@ -32,7 +32,9 @@ import { forceWebsync } from '../../../util/websync';
 import {
   callApi, callApiLocal, initApi, setShouldEnableDebugLog,
 } from '../../../api/gramjs';
-import { removeGlobalFromCache, removeSharedStateFromCache, serializeGlobal } from '../../cache';
+import {
+  removeGlobalFromCache, removeSharedStateFromCache, serializeGlobal, serializeShared,
+} from '../../cache';
 import {
   addActionHandler, getGlobal, setGlobal,
 } from '../../index';
@@ -131,7 +133,7 @@ addActionHandler('loginWithPasskey', async (global, actions, payload): Promise<v
   if (!credential) return;
 
   const publicKeyCredential = credential as PublicKeyCredential;
-  callApi('restartAuthWithPasskey', publicKeyCredential.toJSON());
+  callApi('restartAuthWithPasskey', publicKeyCredential.toJSON() as AuthenticationResponseJSON);
 });
 
 addActionHandler('uploadProfilePhoto', async (global, actions, payload): Promise<void> => {
@@ -300,8 +302,9 @@ addActionHandler('deleteDeviceToken', (global): ActionReturnType => {
 addActionHandler('lockScreen', async (global): Promise<void> => {
   const sessionJson = JSON.stringify({ ...loadStoredSession(), userId: global.currentUserId });
   const globalJson = serializeGlobal(global);
+  const sharedStateJson = serializeShared(global.sharedState);
 
-  await encryptSession(sessionJson, globalJson);
+  await encryptSession(sessionJson, globalJson, sharedStateJson);
   forgetPasscode();
   clearStoredSession();
   updateAppBadge(0);

@@ -1,4 +1,5 @@
 import type {
+  ApiAiComposeToneType,
   ApiAppConfig,
   ApiAttachBot,
   ApiAvailableEffect,
@@ -14,6 +15,7 @@ import type {
   ApiEmojiStatusType,
   ApiGroupCall,
   ApiMessage,
+  ApiMessagePoll,
   ApiNotifyPeerType,
   ApiPaidReactionPrivacyType,
   ApiPasskey,
@@ -23,7 +25,6 @@ import type {
   ApiPeerPhotos,
   ApiPeerStories,
   ApiPhoneCall,
-  ApiPoll,
   ApiPrivacyKey,
   ApiPrivacySettings,
   ApiPromoData,
@@ -45,6 +46,7 @@ import type {
   ApiStoryAlbum,
   ApiTimezone,
   ApiTonAmount,
+  ApiTopPeerCategory,
   ApiTranscription,
   ApiUpdateAuthorizationStateType,
   ApiUpdateConnectionStateType,
@@ -92,6 +94,10 @@ export type GlobalState = {
     byId: Record<string, ApiTimezone>;
     hash: number;
   };
+  aiComposeTones?: {
+    tones: ApiAiComposeToneType[];
+    hash: string;
+  };
   isCacheApiSupported?: boolean;
   connectionState?: ApiUpdateConnectionStateType;
   currentUserId?: string;
@@ -105,6 +111,10 @@ export type GlobalState = {
   initialUnreadNotifications?: number;
   shouldShowContextMenuHint?: boolean;
   botFreezeAppealId?: string;
+  reactionPollingPause?: {
+    until: number;
+    chatId: string;
+  };
 
   audioPlayer: {
     volume: number;
@@ -253,7 +263,7 @@ export type GlobalState = {
       byId: Record<number, number>;
     }>;
     sponsoredByChatId: Record<string, ApiSponsoredMessage>;
-    pollById: Record<string, ApiPoll>;
+    pollById: Record<string, ApiMessagePoll>;
     webPageById: Record<string, ApiWebPage>;
   };
 
@@ -413,20 +423,12 @@ export type GlobalState = {
     };
   };
 
-  topPeers: {
-    userIds?: string[];
+  topPeerCategories: Partial<Record<ApiTopPeerCategory, {
+    peerIds: string[];
+    ratingsByPeerId: Record<string, number>;
     lastRequestedAt?: number;
-  };
-
-  topInlineBots: {
-    userIds?: string[];
-    lastRequestedAt?: number;
-  };
-
-  topBotApps: {
-    userIds?: string[];
-    lastRequestedAt?: number;
-  };
+    isDisabled?: boolean;
+  }>>;
 
   activeSessions: {
     byHash: Record<string, ApiSession>;

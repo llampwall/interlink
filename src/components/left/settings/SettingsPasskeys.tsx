@@ -9,8 +9,9 @@ import type { ApiPasskey } from '../../../api/types';
 
 import { IS_WEBAUTHN_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
-import { formatPastDatetime } from '../../../util/dates/oldDateFormat';
-import { getNextArrowReplacement } from '../../../util/localization/format';
+import { type LangFn } from '../../../util/localization';
+import { formatDateTime, getCalendarDayDiff, secondsToDate } from '../../../util/localization/dateFormat';
+import { NEXT_ARROW_REPLACEMENT } from '../../../util/localization/format';
 import { LOCAL_TGS_PREVIEW_URLS, LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import { REM } from '../../common/helpers/mediaDimensions';
 
@@ -21,6 +22,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
 import CustomEmoji from '../../common/CustomEmoji';
 import Icon from '../../common/icons/Icon';
+import Island, { IslandDescription } from '../../gili/layout/Island';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import Link from '../../ui/Link';
@@ -110,12 +112,14 @@ const SettingsPasskeys = ({
         )}
       >
         <div className="multiline-item full-size" dir="auto">
-          <span className="date">{formatPastDatetime(lang, date)}</span>
-          <span className="title">{name || lang('SettingsPasskeyFallbackTitle')}</span>
+          <span className="title title-with-date">
+            {name || lang('SettingsPasskeyFallbackTitle')}
+            <span className="date">{formatDate(lang, secondsToDate(date))}</span>
+          </span>
           {Boolean(lastUsageDate) && (
             <span className="subtitle">
               {lang('SettingsPasskeyUsedAt', {
-                date: formatPastDatetime(lang, lastUsageDate),
+                date: formatDate(lang, secondsToDate(lastUsageDate)),
               })}
             </span>
           )}
@@ -138,7 +142,7 @@ const SettingsPasskeys = ({
           {lang('SettingsPasskeyInfo')}
         </p>
       </div>
-      <div className="settings-item">
+      <Island className="settings-item">
         {passkeys?.map(renderPasskey)}
         {canAddPasskey && (
           <Button
@@ -152,17 +156,17 @@ const SettingsPasskeys = ({
             {lang('SettingsPasskeysCreate')}
           </Button>
         )}
-        <p className="settings-item-description mt-3" dir="auto">
-          {lang('SettingsPasskeysFooter', {
-            link: (
-              <Link isPrimary onClick={handleOpenPasskeyModal}>
-                {lang('SettingsPasskeysFooterLink', undefined,
-                  { withNodes: true, specialReplacement: getNextArrowReplacement() })}
-              </Link>
-            ),
-          }, { withNodes: true })}
-        </p>
-      </div>
+      </Island>
+      <IslandDescription dir="auto">
+        {lang('SettingsPasskeysFooter', {
+          link: (
+            <Link isPrimary onClick={handleOpenPasskeyModal}>
+              {lang('SettingsPasskeysFooterLink', undefined,
+                { withNodes: true, specialReplacement: NEXT_ARROW_REPLACEMENT })}
+            </Link>
+          ),
+        }, { withNodes: true })}
+      </IslandDescription>
       <ConfirmDialog
         isOpen={Boolean(deleteModalId)}
         title={lang('PasskeyDeleteTitle')}
@@ -175,6 +179,17 @@ const SettingsPasskeys = ({
     </div>
   );
 };
+
+function formatDate(
+  lang: LangFn, date: Date,
+) {
+  const anchorDate = new Date();
+  const calendarDayDiff = getCalendarDayDiff(date, anchorDate);
+  if (Math.abs(calendarDayDiff) > 28) {
+    return formatDateTime(lang, date);
+  }
+  return formatDateTime(lang, date, { relative: 'auto' });
+}
 
 export default memo(withGlobal<OwnProps>(
   (global): Complete<StateProps> => {

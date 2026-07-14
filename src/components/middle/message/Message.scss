@@ -154,6 +154,10 @@
       padding-left: 0;
     }
 
+    &.has-guest-avatar {
+      padding-left: 2.5rem;
+    }
+
     &.first-in-group:not(.last-in-group) {
       --border-bottom-left-radius: var(--border-radius-messages-small);
     }
@@ -182,6 +186,10 @@
       &.is-thread-top {
         padding-left: 0.25rem;
       }
+
+      &.has-guest-avatar {
+        padding-left: 2.875rem;
+      }
     }
   }
 
@@ -197,7 +205,7 @@
     --active-color: var(--color-reply-own-active);
     --max-width: 30rem;
     --accent-color: var(--color-accent-own);
-    --accent-shade-color: var(--color-green);
+    --accent-shade-color: var(--color-active);
     --secondary-color: var(--color-accent-own);
     --color-code: var(--color-code-own);
     --color-code-bg: var(--color-code-own-bg);
@@ -411,13 +419,13 @@
 
   &.is-selected {
     .message-select-control {
-      background: var(--color-green);
+      background: var(--color-active);
 
       &.group-select {
         background: transparent;
 
         &.is-selected {
-          background: var(--color-green);
+          background: var(--color-active);
         }
       }
     }
@@ -425,7 +433,7 @@
 
   .File.file-is-selected {
     .message-select-control {
-      background: var(--color-green);
+      background: var(--color-active);
     }
   }
 
@@ -488,7 +496,7 @@
 
     &.is-selected {
       .message-select-control {
-        background: var(--color-green);
+        background: var(--color-active);
       }
 
       img,
@@ -501,7 +509,7 @@
   &.is-selected,
   &.is-forwarding {
     .message-select-control {
-      background: var(--color-green);
+      background: var(--color-active);
     }
 
     .Menu .bubble {
@@ -511,6 +519,8 @@
 
   &.is-in-document-group {
     .message-content.document {
+      --surface-breakout-margin: -0.5rem;
+
       padding: 0.25rem 0.5rem !important;
     }
 
@@ -666,12 +676,17 @@
 
   .message-content {
     &.has-replies:not(.custom-shape),
-    &.has-footer:not(.web-page) {
+    &.has-footer:not(.web-page):not(.poll) {
       .media-inner,
       .Album {
         --border-bottom-left-radius: 0;
         --border-bottom-right-radius: 0;
       }
+    }
+
+    &.poll > .content-inner > .media-inner {
+      --border-bottom-left-radius: 0;
+      --border-bottom-right-radius: 0;
     }
 
     &.text.is-inverted-media {
@@ -740,7 +755,7 @@
 
   .message-action-button-sticky {
     position: sticky;
-    top: 0.5rem;
+    top: calc(0.5rem + var(--message-list-top-inset, var(--middle-header-panes-height)));
   }
 
   .message-action-buttons {

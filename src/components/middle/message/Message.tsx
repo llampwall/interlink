@@ -1,4 +1,5 @@
 import {
+  type ElementRef,
   memo,
   useCallback,
   useEffect,
@@ -17,8 +18,8 @@ import type {
   ApiKeyboardButton,
   ApiMessage,
   ApiMessageOutgoingStatus,
+  ApiMessagePoll,
   ApiPeer,
-  ApiPoll,
   ApiReaction,
   ApiReactionKey,
   ApiSavedReactionTag,
@@ -40,6 +41,7 @@ import type {
   TextSummary,
   ThemeKey,
   ThreadId,
+  TranslationTone,
 } from '../../../types';
 import type { Signal } from '../../../util/signals';
 import { MAIN_THREAD_ID } from '../../../api/types';
@@ -71,7 +73,7 @@ import {
   isReplyToMessage,
   isSystemBot,
 } from '../../../global/helpers';
-import { getPeerFullTitle } from '../../../global/helpers/peers';
+import { getPeerFullTitle, getPeerTitle } from '../../../global/helpers/peers';
 import { getMessageReplyInfo, getStoryReplyInfo } from '../../../global/helpers/replies';
 import {
   selectActiveDownloads,
@@ -106,6 +108,7 @@ import {
   selectPollFromMessage,
   selectReplyMessage,
   selectRequestedChatTranslationLanguage,
+  selectRequestedChatTranslationTone,
   selectRequestedMessageTranslationLanguage,
   selectSender,
   selectSenderFromHeader,
@@ -131,6 +134,7 @@ import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
 import { isUserId } from '../../../util/entities/ids';
 import { getMessageKey } from '../../../util/keys/messageKey';
+import { parseTranslationCacheKey } from '../../../util/keys/translationKey';
 import { getServerTime } from '../../../util/serverTime';
 import stopEvent from '../../../util/stopEvent';
 import { isElementInViewport } from '../../../util/visibility/isElementInViewport';
@@ -159,6 +163,7 @@ import useTextLanguage from '../../../hooks/useTextLanguage';
 import useDetectChatLanguage from './hooks/useDetectChatLanguage';
 import useFocusMessageListElement from './hooks/useFocusMessageListElement';
 import useInnerHandlers from './hooks/useInnerHandlers';
+import useMessageReadMetrics from './hooks/useMessageReadMetrics';
 import useMessageTranslation from './hooks/useMessageTranslation';
 import useOuterHandlers from './hooks/useOuterHandlers';
 
@@ -172,6 +177,7 @@ import EmbeddedStory from '../../common/embedded/EmbeddedStory';
 import FakeIcon from '../../common/FakeIcon';
 import Icon from '../../common/icons/Icon';
 import StarIcon from '../../common/icons/StarIcon';
+import MessageRichText from '../../common/MessageRichText';
 import MessageText from '../../common/MessageText';
 import PeerColorWrapper from '../../common/PeerColorWrapper';
 import RankBadge from '../../common/RankBadge';
@@ -202,7 +208,7 @@ import MessageMeta from './MessageMeta';
 import MessagePhoneCall from './MessagePhoneCall';
 import PaidMediaOverlay from './PaidMediaOverlay';
 import Photo from './Photo';
-import Poll from './Poll';
+import Poll from './poll/Poll';
 import Reactions from './reactions/Reactions';
 import RoundVideo from './RoundVideo';
 import Sticker from './Sticker';
@@ -236,8 +242,12 @@ type OwnProps = {
   appearanceOrder: number;
   isJustAdded: boolean;
   isThreadTop?: boolean;
+  shouldIgnoreSendFocus?: boolean;
+  isQuickPreview?: boolean;
   memoFirstUnreadIdRef?: { current: number | undefined };
   getIsMessageListReady?: Signal<boolean>;
+  containerRef?: ElementRef<HTMLDivElement>;
+  isMessageListActive?: boolean;
   observeIntersectionForBottom?: ObserveFn;
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
@@ -290,6 +300,7 @@ type StateProps = {
   threadId?: ThreadId;
   isPinnedList?: boolean;
   isPinned?: boolean;
+  isMessagePrimaryEditedDateEnabled: boolean;
   canAutoLoadMedia?: boolean;
   canAutoPlayMedia?: boolean;
   hasLinkedChat?: boolean;
@@ -301,6 +312,7 @@ type StateProps = {
   defaultReaction?: ApiReaction;
   activeEmojiInteractions?: ActiveEmojiInteraction[];
   hasUnreadReaction?: boolean;
+  hasUnreadPollVote?: boolean;
   isTranscribing?: boolean;
   transcribedText?: string;
   isPremium: boolean;
@@ -312,6 +324,7 @@ type StateProps = {
   shouldDetectChatLanguage?: boolean;
   requestedTranslationLanguage?: string;
   requestedChatTranslationLanguage?: string;
+  requestedTranslationTone?: TranslationTone;
   withAnimatedEffects?: boolean;
   canAnimateTextStreaming?: boolean;
   webPageStory?: ApiTypeStory;
@@ -322,8 +335,9 @@ type StateProps = {
   tags?: Record<ApiReactionKey, ApiSavedReactionTag>;
   canTranscribeVoice?: boolean;
   viaBusinessBot?: ApiUser;
+  guestFromSender?: ApiPeer;
   effect?: ApiAvailableEffect;
-  poll?: ApiPoll;
+  poll?: ApiMessagePoll;
   webPage?: ApiWebPage;
   maxTimestamp?: number;
   lastPlaybackTimestamp?: number;
@@ -424,6 +438,7 @@ const Message = ({
   messageListType,
   isPinnedList,
   isPinned,
+  isMessagePrimaryEditedDateEnabled,
   isDownloading,
   canAutoLoadMedia,
   canAutoPlayMedia,
@@ -431,6 +446,7 @@ const Message = ({
   autoLoadFileMaxSizeMb,
   repliesThreadInfo,
   hasUnreadReaction,
+  hasUnreadPollVote,
   memoFirstUnreadIdRef,
   senderChatMember,
   messageTopic,
@@ -440,16 +456,19 @@ const Message = ({
   shouldDetectChatLanguage,
   requestedTranslationLanguage,
   requestedChatTranslationLanguage,
+  requestedTranslationTone,
   withAnimatedEffects,
   canAnimateTextStreaming,
   webPageStory,
   isConnected,
   getIsMessageListReady,
+  containerRef,
   shouldWarnAboutFiles,
   senderBoosts,
   tags,
   canTranscribeVoice,
   viaBusinessBot,
+  guestFromSender,
   effect,
   poll,
   maxTimestamp,
@@ -466,6 +485,8 @@ const Message = ({
   observeIntersectionForBottom,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
+  isMessageListActive,
+  isQuickPreview,
   onMessageUnmount,
 }: OwnProps & StateProps) => {
   const {
@@ -477,7 +498,10 @@ const Message = ({
     disableContextMenuHint,
     animateUnreadReaction,
     focusMessage,
+    markTypingDraftDone,
+    markMessageListRead,
     markMentionsRead,
+    markPollVotesRead,
     openThread,
     summarizeMessage,
   } = getActions();
@@ -488,8 +512,12 @@ const Message = ({
 
   const oldLang = useOldLang();
   const lang = useLang();
+  const {
+    id: messageId, chatId, forwardInfo, viaBotId, guestChatViaId, isTranscriptionError, factCheck,
+    isTypingDraft, previousLocalId, fromRank,
+  } = message;
 
-  const [isTranscriptionHidden, setTranscriptionHidden] = useState(false);
+  const [isTranscriptionHidden, setIsTranscriptionHidden] = useState(false);
   const [isPlayingSnapAnimation, setIsPlayingSnapAnimation] = useState(false);
   const [isPlayingDeleteAnimation, setIsPlayingDeleteAnimation] = useState(false);
   const [shouldPlayEffect, requestEffect, hideEffect] = useFlag();
@@ -499,7 +527,7 @@ const Message = ({
   const [declineReason, setDeclineReason] = useState('');
   const { isMobile, isTouchScreen } = useAppLayout();
 
-  useOnIntersect(bottomMarkerRef, observeIntersectionForBottom);
+  useOnIntersect(bottomMarkerRef, isTypingDraft ? undefined : observeIntersectionForBottom);
 
   const {
     isContextMenuOpen,
@@ -530,8 +558,9 @@ const Message = ({
       return;
     }
 
+    // Message appearance animation works only if this timeout is not cleared. Migrate to `sibling-index()` when baseline widely available.
     setTimeout(markShown, appearanceOrder * MESSAGE_APPEARANCE_DELAY);
-  }, [appearanceOrder, markShown, noAppearanceAnimation]);
+  }, [appearanceOrder, noAppearanceAnimation]);
 
   useShowTransition({
     ref,
@@ -544,16 +573,27 @@ const Message = ({
     onMessageUnmount?.(messageId);
   });
 
-  const {
-    id: messageId, chatId, forwardInfo, viaBotId, isTranscriptionError, factCheck,
-    isTypingDraft, fromRank,
-  } = message;
   const hasSummary = Boolean(message.summaryLanguageCode);
 
   const isLocal = isMessageLocal(message);
   const isOwn = isOwnMessage(message);
   const isScheduled = messageListType === 'scheduled' || message.isScheduled;
+  const readMetricsMessage = album?.mainMessage || message;
+  const canReportReadMetrics = messageListType === 'thread'
+    && threadId === MAIN_THREAD_ID
+    && !isQuickPreview
+    && !isLocal
+    && readMetricsMessage.viewsCount !== undefined;
   const hasMessageReply = isReplyToMessage(message) && !shouldHideReply;
+
+  useMessageReadMetrics({
+    messageRef: ref,
+    containerRef,
+    chatId,
+    messageId: readMetricsMessage.id,
+    isEnabled: canReportReadMetrics,
+    isMessageListActive,
+  });
 
   const { paidMedia } = getMessageContent(message);
   const { photo: paidMediaPhoto, video: paidMediaVideo } = getSingularPaidMedia(paidMedia);
@@ -576,13 +616,15 @@ const Message = ({
   const isCustomShape = !withVoiceTranscription && getMessageCustomShape(message);
   const hasAnimatedEmoji = isCustomShape && (animatedEmoji || animatedCustomEmoji);
   const hasReactions = reactionMessage?.reactions && !areReactionsEmpty(reactionMessage.reactions);
+  const hasViaSender = Boolean(viaBotId || guestChatViaId);
+
   const asForwarded = (
     forwardInfo
     && (!isChatWithSelf || isScheduled)
     && !isRepliesChat
     && !forwardInfo.isLinkedChannelPost
     && !isAnonymousForwards
-    && !botSender
+    && !hasViaSender
   ) || Boolean(storyData && !storyData.isMention);
   const canShowSenderBoosts = Boolean(senderBoosts) && !asForwarded && isFirstInGroup;
   const isStoryMention = storyData?.isMention;
@@ -667,6 +709,7 @@ const Message = ({
   const {
     handleSenderClick,
     handleViaBotClick,
+    handleGuestForClick,
     handleReplyClick,
     handleMediaClick,
     handleDocumentClick,
@@ -679,7 +722,6 @@ const Message = ({
     handleOpenThread,
     handleReadMedia,
     handleCancelUpload,
-    handleVoteSend,
     handleGroupForward,
     handleForward,
     handleFocus,
@@ -701,6 +743,7 @@ const Message = ({
     avatarPeer,
     senderPeer,
     botSender,
+    guestFromSender,
     messageTopic,
     isTranslatingChat: Boolean(requestedChatTranslationLanguage),
     story: replyStory && 'content' in replyStory ? replyStory : undefined,
@@ -714,11 +757,12 @@ const Message = ({
     if (hasSummary && isShowingSummary && !summary) {
       summarizeMessage({
         chatId,
-        id: message.id,
+        id: messageId,
         toLanguageCode: requestedTranslationLanguage,
+        onError: hideSummary,
       });
     }
-  }, [hasSummary, chatId, message.id, requestedTranslationLanguage, isShowingSummary, summary]);
+  }, [hasSummary, chatId, messageId, requestedTranslationLanguage, isShowingSummary, summary, hideSummary]);
 
   const handleEffectClick = useLastCallback((e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
@@ -792,6 +836,7 @@ const Message = ({
     isJustAdded && 'is-just-added',
     (hasActiveReactions || shouldPlayEffect) && 'has-active-effect',
     isStoryMention && 'is-story-mention',
+    guestChatViaId && 'has-guest-avatar',
   );
 
   const text = textMessage && getMessageContent(textMessage).text;
@@ -824,12 +869,19 @@ const Message = ({
   useDetectChatLanguage(message, detectedLanguage, !shouldDetectChatLanguage, getIsMessageListReady);
 
   const shouldTranslate = isMessageTranslatable(message, !requestedChatTranslationLanguage);
+
+  const isManualMessageTranslation = !requestedChatTranslationLanguage && requestedTranslationLanguage;
+  const parsedManualTranslation = isManualMessageTranslation
+    ? parseTranslationCacheKey(requestedTranslationLanguage) : undefined;
+  const translationLanguageForHook = parsedManualTranslation?.languageCode || requestedChatTranslationLanguage;
+  const translationToneForHook = parsedManualTranslation?.tone || requestedTranslationTone;
+
   const { isPending: isTranslationPending, translatedText } = useMessageTranslation(
-    chatTranslations, chatId, shouldTranslate ? messageId : undefined, requestedTranslationLanguage,
+    chatTranslations, chatId, shouldTranslate ? messageId : undefined, translationLanguageForHook,
+    translationToneForHook,
   );
   const isSummaryPending = Boolean(summary?.isPending);
   const isNewTextPending = isTranslationPending || isSummaryPending;
-  // Used to display previous result while new one is loading
   const previousTranslatedText = usePreviousDeprecated(translatedText, Boolean(shouldTranslate));
 
   useEffectWithPrevDeps(([prevIsShowingSummary]) => {
@@ -956,11 +1008,29 @@ const Message = ({
     || undefined;
 
   useEffect(() => {
+    if (isTypingDraft) {
+      return;
+    }
+
     const bottomMarker = bottomMarkerRef.current;
     if (!bottomMarker || !isElementInViewport(bottomMarker)) return;
 
+    if (
+      message.wasTypingDraft
+      && !isQuickPreview
+      && !isOwn
+      && memoFirstUnreadIdRef?.current
+      && messageId >= memoFirstUnreadIdRef.current
+    ) {
+      markMessageListRead({ maxId: messageId });
+    }
+
     if (hasUnreadReaction) {
       animateUnreadReaction({ chatId, messageIds: [messageId] });
+    }
+
+    if (hasUnreadPollVote) {
+      markPollVotesRead({ chatId, messageIds: [messageId] });
     }
 
     let unreadMentionIds: number[] = [];
@@ -975,7 +1045,22 @@ const Message = ({
     if (unreadMentionIds.length) {
       markMentionsRead({ chatId, messageIds: unreadMentionIds });
     }
-  }, [hasUnreadReaction, album, chatId, messageId, animateUnreadReaction, message.hasUnreadMention]);
+  }, [
+    hasUnreadReaction,
+    hasUnreadPollVote,
+    album,
+    chatId,
+    isQuickPreview,
+    isOwn,
+    isTypingDraft,
+    markMessageListRead,
+    messageId,
+    memoFirstUnreadIdRef,
+    animateUnreadReaction,
+    markPollVotesRead,
+    message.hasUnreadMention,
+    message.wasTypingDraft,
+  ]);
 
   const albumLayout = useMemo(() => {
     return isAlbum
@@ -1052,8 +1137,32 @@ const Message = ({
 
   const contentStyle = buildStyle(peerColorStyle, sizeStyles);
 
+  const handleTypingAnimationEnd = useLastCallback(() => {
+    if (!isTypingDraft || !previousLocalId) {
+      return;
+    }
+
+    markTypingDraftDone({ chatId, messageId });
+  });
+
   function renderMessageText(isForAnimation?: boolean) {
     if (!textMessage) return undefined;
+
+    if (textMessage.content.richMessage) {
+      return (
+        <MessageRichText
+          message={textMessage}
+          isOwn={isOwn}
+          noAvatars={noAvatars}
+          canAutoLoadMedia={canAutoLoadMedia}
+          isProtected={isProtected}
+          theme={theme}
+          observeIntersectionForLoading={observeIntersectionForLoading}
+          observeIntersectionForPlaying={observeIntersectionForPlaying}
+          threadId={threadId}
+        />
+      );
+    }
 
     const forcedText = (isShowingSummary && summary?.text)
       || (requestedTranslationLanguage ? currentTranslatedText : undefined);
@@ -1071,16 +1180,21 @@ const Message = ({
         observeIntersectionForPlaying={observeIntersectionForPlaying}
         withTranslucentThumbs={isCustomShape}
         isInSelectMode={isInSelectMode}
-        canBeEmpty={hasFactCheck}
+        canBeEmpty={hasFactCheck || isTypingDraft}
         maxTimestamp={maxTimestamp}
         threadId={threadId}
         shouldAnimateTyping={isTypingDraft}
         canAnimateTextStreaming={canAnimateTextStreaming}
+        onTypingAnimationEnd={handleTypingAnimationEnd}
       />
     );
   }
 
   function renderMessageTextAnimation() {
+    if (textMessage?.content.richMessage) {
+      return undefined;
+    }
+
     return (
       <div className="translation-animation">
         <div className="text-loading">
@@ -1122,6 +1236,7 @@ const Message = ({
         message={message}
         isPinned={isPinned}
         withFullDate={isChatWithSelf && !isOwn}
+        isMessagePrimaryEditedDateEnabled={isMessagePrimaryEditedDateEnabled}
         noReplies={noReplies}
         repliesThreadInfo={repliesThreadInfo}
         outgoingStatus={outgoingStatus}
@@ -1208,6 +1323,7 @@ const Message = ({
                 chatTranslations={chatTranslations}
                 isMediaNsfw={isReplyMediaNsfw}
                 requestedChatTranslationLanguage={requestedChatTranslationLanguage}
+                requestedChatTranslationTone={requestedTranslationTone}
                 observeIntersectionForLoading={observeIntersectionForLoading}
                 observeIntersectionForPlaying={observeIntersectionForPlaying}
                 onClick={handleReplyClick}
@@ -1220,6 +1336,7 @@ const Message = ({
                 noUserColors={noUserColors}
                 isProtected={isProtected}
                 observeIntersectionForLoading={observeIntersectionForLoading}
+                observeIntersectionForPlaying={observeIntersectionForPlaying}
                 onClick={handleStoryClick}
               />
             )}
@@ -1300,7 +1417,7 @@ const Message = ({
             canAutoLoad={canAutoLoadMedia}
             isDownloading={isDownloading}
             onReadMedia={shouldReadMedia ? handleReadMedia : undefined}
-            onHideTranscription={setTranscriptionHidden}
+            onHideTranscription={setIsTranscriptionHidden}
             isTranscriptionError={isTranscriptionError}
             isTranscribed={Boolean(transcribedText)}
             canTranscribe={canTranscribeVoice && !hasTtl}
@@ -1326,7 +1443,7 @@ const Message = ({
             isTranscribed={Boolean(transcribedText)}
             isTranscriptionError={isTranscriptionError}
             canDownload={!isProtected}
-            onHideTranscription={setTranscriptionHidden}
+            onHideTranscription={setIsTranscriptionHidden}
             canTranscribe={canTranscribeVoice && !hasTtl}
           />
         )}
@@ -1357,7 +1474,17 @@ const Message = ({
           <Contact contact={contact} noUserColors={isOwn} />
         )}
         {poll && (
-          <Poll message={message} poll={poll} onSendVote={handleVoteSend} />
+          <Poll
+            key={poll.summary.id}
+            chatId={chatId}
+            messageId={messageId}
+            poll={poll}
+            messageText={text}
+            theme={theme}
+            isInScheduled={isScheduled}
+            observeIntersectionForLoading={observeIntersectionForLoading}
+            observeIntersectionForPlaying={observeIntersectionForPlaying}
+          />
         )}
         {todo && (
           <TodoList message={message} todoList={todo} />
@@ -1591,8 +1718,9 @@ const Message = ({
 
   function shouldRenderSenderName() {
     const media = photo || video || location || paidMedia;
-    return !(isCustomShape && !viaBotId) && (
-      (withSenderName && (!media || hasTopicChip)) || asForwarded || viaBotId || forceSenderName
+    return !(isCustomShape && !hasViaSender) && (
+      (withSenderName && (!media || hasTopicChip)) || asForwarded || viaBotId
+      || (guestChatViaId && isFirstInGroup) || forceSenderName
     ) && !isInDocumentGroupNotFirst && !(hasMessageReply && isCustomShape);
   }
 
@@ -1670,8 +1798,7 @@ const Message = ({
     shouldSkipRenderForwardTitle: boolean = false, shouldSkipRenderAdminTitle: boolean = false,
   ) {
     let senderTitle;
-    let senderColor;
-    if (senderPeer && !(isCustomShape && viaBotId)) {
+    if (senderPeer && !(isCustomShape && hasViaSender)) {
       senderTitle = getPeerFullTitle(oldLang, senderPeer);
     } else if (forwardInfo?.hiddenUserName) {
       senderTitle = forwardInfo.hiddenUserName;
@@ -1680,6 +1807,7 @@ const Message = ({
     }
     const senderEmojiStatus = senderPeer && 'emojiStatus' in senderPeer && senderPeer.emojiStatus;
     const senderIsPremium = senderPeer && 'isPremium' in senderPeer && senderPeer.isPremium;
+    const guestFromSenderTitle = guestFromSender ? getPeerTitle(oldLang, guestFromSender) : undefined;
 
     const shouldRenderForwardAvatar = asForwarded && senderPeer;
     return (
@@ -1689,7 +1817,6 @@ const Message = ({
             className={buildClassName(
               'message-title-name-container',
               forwardInfo?.hiddenUserName ? 'sender-hidden' : 'interactive',
-              senderColor,
             )}
             dir="ltr"
           >
@@ -1722,17 +1849,28 @@ const Message = ({
               {senderPeer?.fakeType && <FakeIcon fakeType={senderPeer.fakeType} />}
             </span>
           </span>
-        ) : !botSender ? (
+        ) : (!botSender && !guestFromSender) ? (
           NBSP
         ) : undefined}
         {botSender?.hasUsername && (
-          <span className="interactive">
-            <span className="via">{oldLang('ViaBot')}</span>
+          <span className="interactive via-sender">
+            <span className="via">{lang('ViaBot')}</span>
             <span
               className="sender-title"
               onClick={handleViaBotClick}
             >
               {renderText(`@${getMainUsername(botSender)}`)}
+            </span>
+          </span>
+        )}
+        {guestFromSenderTitle && (
+          <span className="interactive via-sender">
+            <span className="via">{lang('ForBot')}</span>
+            <span
+              className="sender-title"
+              onClick={handleGuestForClick}
+            >
+              {renderText(guestFromSenderTitle)}
             </span>
           </span>
         )}
@@ -1839,6 +1977,7 @@ const Message = ({
         data-last-message-id={album ? album.messages[album.messages.length - 1].id : undefined}
         data-album-main-id={album ? album.mainMessage.id : undefined}
         data-has-unread-mention={message.hasUnreadMention || undefined}
+        data-has-unread-poll-vote={hasUnreadPollVote || undefined}
         data-has-unread-reaction={hasUnreadReaction || undefined}
         data-is-pinned={isPinned || undefined}
         data-should-update-views={message.viewsCount !== undefined}
@@ -2013,11 +2152,11 @@ export default memo(withGlobal<OwnProps>(
     } = selectTabState(global);
     const {
       message, album, documentGroup, withSenderName, withAvatar, threadId, messageListType,
-      isLastInDocumentGroup, isFirstInGroup,
+      isLastInDocumentGroup, isFirstInGroup, shouldIgnoreSendFocus,
     } = ownProps;
     const {
-      id, chatId, viaBotId, isOutgoing, forwardInfo, transcriptionId, isPinned, viaBusinessBotId, effectId,
-      paidMessageStars,
+      id, chatId, viaBotId, guestChatViaId, isOutgoing, forwardInfo, transcriptionId, isPinned,
+      viaBusinessBotId, effectId, paidMessageStars,
     } = message;
 
     const webPage = selectFullWebPageFromMessage(global, message);
@@ -2045,6 +2184,7 @@ export default memo(withGlobal<OwnProps>(
     const sender = selectSender(global, message);
     const originSender = selectForwardedSender(global, message);
     const botSender = viaBotId ? selectUser(global, viaBotId) : undefined;
+    const guestFromSender = guestChatViaId ? selectPeer(global, guestChatViaId) : undefined;
     const senderChatMember = sender?.id
       ? (adminMembersById?.[sender?.id] || members?.find((member) => member.userId === sender?.id))
       : undefined;
@@ -2070,11 +2210,18 @@ export default memo(withGlobal<OwnProps>(
     const storySender = storyReplyPeerId ? selectPeer(global, storyReplyPeerId) : undefined;
 
     const uploadProgress = selectUploadProgress(global, message);
-    const isFocused = messageListType === 'thread' && (
+    const isFocusTarget = messageListType === 'thread' && (
       album
         ? album.messages.some((m) => selectIsMessageFocused(global, m, threadId))
         : selectIsMessageFocused(global, message, threadId)
     );
+    const shouldIgnoreFocus = Boolean(
+      isFocusTarget
+      && shouldIgnoreSendFocus
+      && focusedMessage?.noHighlight
+      && focusedMessage.isResizingContainer,
+    );
+    const isFocused = isFocusTarget && !shouldIgnoreFocus;
 
     const {
       direction: focusDirection, noHighlight: noFocusHighlight, isResizingContainer,
@@ -2114,6 +2261,7 @@ export default memo(withGlobal<OwnProps>(
 
     const readState = selectThreadReadState(global, chatId, threadId);
     const hasUnreadReaction = readState?.unreadReactions?.includes(message.id);
+    const hasUnreadPollVote = readState?.unreadPollVotes?.includes(message.id);
 
     const hasTopicChip = threadId === MAIN_THREAD_ID && chat?.isForum && !chat.isBotForum && isFirstInGroup;
     const messageTopic = selectTopicFromMessage(global, message);
@@ -2122,6 +2270,7 @@ export default memo(withGlobal<OwnProps>(
 
     const requestedTranslationLanguage = selectRequestedMessageTranslationLanguage(global, chatId, message.id);
     const requestedChatTranslationLanguage = selectRequestedChatTranslationLanguage(global, chatId);
+    const requestedTranslationTone = selectRequestedChatTranslationTone(global, chatId);
 
     const areTranslationsEnabled = IS_TRANSLATION_SUPPORTED && global.settings.byKey.canTranslate
       && !requestedChatTranslationLanguage; // Stop separate language detection if chat translation is requested
@@ -2165,6 +2314,7 @@ export default memo(withGlobal<OwnProps>(
       canShowSender,
       originSender,
       botSender,
+      guestFromSender,
       shouldHideReply: shouldHideReply || isReplyToTopicStart,
       replyMessage,
       replyMessageSender,
@@ -2200,6 +2350,7 @@ export default memo(withGlobal<OwnProps>(
       isDownloading,
       isPinnedList: messageListType === 'pinned',
       isPinned,
+      isMessagePrimaryEditedDateEnabled: Boolean(global.appConfig.isMessagePrimaryEditedDateEnabled),
       canAutoLoadMedia: selectCanAutoLoadMedia(global, message),
       canAutoPlayMedia: selectCanAutoPlayMedia(global, message),
       autoLoadFileMaxSizeMb: global.settings.byKey.autoLoadFileMaxSizeMb,
@@ -2211,6 +2362,7 @@ export default memo(withGlobal<OwnProps>(
       hasActiveReactions,
       activeEmojiInteractions,
       hasUnreadReaction,
+      hasUnreadPollVote,
       isTranscribing: transcriptionId !== undefined && global.transcriptions[transcriptionId]?.isPending,
       transcribedText: transcriptionId !== undefined ? global.transcriptions[transcriptionId]?.text : undefined,
       isPremium,
@@ -2222,6 +2374,7 @@ export default memo(withGlobal<OwnProps>(
       shouldDetectChatLanguage: selectShouldDetectChatLanguage(global, chatId),
       requestedTranslationLanguage,
       requestedChatTranslationLanguage,
+      requestedTranslationTone,
       hasLinkedChat: Boolean(chatFullInfo?.linkedChatId),
       withAnimatedEffects: selectPerformanceSettingsValue(global, 'stickerEffects'),
       canAnimateTextStreaming: selectPerformanceSettingsValue(global, 'textStreaming'),

@@ -37,7 +37,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
       birthday, personalChannelId, personalChannelMessage, sponsoredEnabled, stargiftsCount, botVerification,
       botCanManageEmojiStatus, settings, sendPaidMessagesStars, displayGiftsButton, disallowedGifts,
       starsRating, starsMyPendingRating, starsMyPendingRatingDate, mainTab, note,
-      noforwardsMyEnabled, noforwardsPeerEnabled,
+      noforwardsMyEnabled, noforwardsPeerEnabled, unofficialSecurityRisk,
     },
     users,
   } = mtpUserFull;
@@ -80,6 +80,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
     note: note && buildApiFormattedText(note),
     noForwardsMyEnabled: noforwardsMyEnabled,
     noForwardsPeerEnabled: noforwardsPeerEnabled,
+    isUnofficialSecurityRisk: unofficialSecurityRisk,
   };
 }
 
@@ -115,7 +116,8 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
   const {
     id, firstName, lastName, fake, scam, support, closeFriend, storiesUnavailable,
     bot, botActiveUsers, botVerificationIcon, botInlinePlaceholder, botAttachMenu, botCanEdit,
-    sendPaidMessagesStars, profileColor, botForumView, botForumCanManageTopics,
+    sendPaidMessagesStars, profileColor, botForumView, botForumCanManageTopics, botGuestchat,
+    botGuard,
   } = mtpUser;
   const storiesMaxId = mtpUser.storiesMaxId?.maxId;
   const hasVideoAvatar = mtpUser.photo instanceof GramJs.UserProfilePhoto ? Boolean(mtpUser.photo.hasVideo) : undefined;
@@ -161,6 +163,8 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
     paidMessagesStars: toJSNumber(sendPaidMessagesStars),
     isBotForum: botForumView,
     canManageBotForumTopics: botForumCanManageTopics,
+    isGuestChatBot: botGuestchat,
+    isGuardBot: bot && botGuard,
   };
 }
 

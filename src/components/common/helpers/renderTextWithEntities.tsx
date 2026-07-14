@@ -7,8 +7,11 @@ import type { TextPart, ThreadId } from '../../../types';
 import type { TextFilter } from './renderText';
 import { ApiMessageEntityTypes } from '../../../api/types';
 
+import { ensureProtocol } from '../../../util/browser/url';
 import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
+import { buildFormattedDateHtml } from '../../../util/dates/formattedDate';
+import { escapeHtmlAttribute } from '../../middle/composer/helpers/cleanHtml';
 import { buildCustomEmojiHtmlFromEntity } from '../../middle/composer/helpers/customEmoji';
 import renderText from './renderText';
 
@@ -298,12 +301,6 @@ function renderMessagePart({
   }
 
   return renderText(content, filters, params);
-}
-
-export function insertTextEntities(entities: ApiMessageEntity[], newEntities: ApiMessageEntity[]) {
-  return newEntities.reduce((acc, newEntity) => {
-    return insertTextEntity(acc, newEntity);
-  }, entities);
 }
 
 export function insertTextEntity(entities: ApiMessageEntity[], newEntity: ApiMessageEntity) {
@@ -684,6 +681,25 @@ function processEntity({
           {renderNestedMessagePart()}
         </FormattedDate>
       );
+    case ApiMessageEntityTypes.DiffInsert:
+      return (
+        <span className="text-entity-diff-insert" data-entity-type={entity.type}>
+          {renderNestedMessagePart()}
+        </span>
+      );
+    case ApiMessageEntityTypes.DiffReplace:
+      return (
+        <span className="text-entity-diff-replace" data-entity-type={entity.type}>
+          <span className="text-entity-diff-replace-old">{entity.oldText}</span>
+          <span className="text-entity-diff-replace-new">{renderNestedMessagePart()}</span>
+        </span>
+      );
+    case ApiMessageEntityTypes.DiffDelete:
+      return (
+        <span className="text-entity-diff-delete" data-entity-type={entity.type}>
+          {renderNestedMessagePart()}
+        </span>
+      );
     default:
       return renderNestedMessagePart();
   }
@@ -733,7 +749,7 @@ function processEntityAsHtml(
     case ApiMessageEntityTypes.TextUrl:
       return `<a
         class="text-entity-link"
-        href=${getLinkUrl(rawEntityText, entity)}
+        href="${getHtmlLinkUrl(rawEntityText, entity)}"
         data-entity-type="${entity.type}"
         dir="auto"
       >${renderedContent}</a>`;
@@ -749,6 +765,8 @@ function processEntityAsHtml(
         class="blockquote"
         data-entity-type="${ApiMessageEntityTypes.Blockquote}"
         >${renderedContent}</blockquote>`;
+    case ApiMessageEntityTypes.FormattedDate:
+      return buildFormattedDateHtml(renderedContent, entity);
     default:
       return renderedContent;
   }
@@ -757,6 +775,10 @@ function processEntityAsHtml(
 function getLinkUrl(entityContent: string, entity: ApiMessageEntity) {
   const { type } = entity;
   return type === ApiMessageEntityTypes.TextUrl && entity.url ? entity.url : entityContent;
+}
+
+function getHtmlLinkUrl(entityContent: string, entity: ApiMessageEntity) {
+  return escapeHtmlAttribute(ensureProtocol(getLinkUrl(entityContent, entity)));
 }
 
 function handleBotCommandClick(e: React.MouseEvent<HTMLAnchorElement>) {

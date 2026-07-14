@@ -9,8 +9,8 @@ import type {
   ApiChat,
   ApiChatReactions,
   ApiMessage,
+  ApiMessagePoll,
   ApiPeer,
-  ApiPoll,
   ApiReaction,
   ApiStickerSet,
   ApiThreadInfo,
@@ -18,18 +18,20 @@ import type {
   ApiUser,
   ApiWebPage,
 } from '../../../api/types';
-import type { IAnchorPosition } from '../../../types';
+import type { IAnchorPosition, TranslationTone } from '../../../types';
 
 import {
   getUserFullName,
   groupStatefulContent,
 } from '../../../global/helpers';
+import { getPeerTitle } from '../../../global/helpers/peers';
 import buildClassName from '../../../util/buildClassName';
 import { isUserId } from '../../../util/entities/ids';
 import { disableScrolling } from '../../../util/scrollLock';
 import { REM } from '../../common/helpers/mediaDimensions';
 import renderText from '../../common/helpers/renderText';
 import { getMessageCopyOptions } from './helpers/copyOptions';
+import { getPollCountryRestrictionMessage, getPollSubscriberRestrictionMessage } from './poll/helpers';
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import useFlag from '../../../hooks/useFlag';
@@ -38,9 +40,11 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import AvatarList from '../../common/AvatarList';
+import Icon from '../../common/icons/Icon';
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
 import MenuSeparator from '../../ui/MenuSeparator';
+import NestedMenuItem from '../../ui/NestedMenuItem';
 import Skeleton from '../../ui/placeholder/Skeleton';
 import LastEditTimeMenuItem from './LastEditTimeMenuItem';
 import ReactionSelector from './reactions/ReactionSelector';
@@ -57,7 +61,8 @@ type OwnProps = {
   anchor: IAnchorPosition;
   targetHref?: string;
   message: ApiMessage;
-  poll?: ApiPoll;
+  chat?: ApiChat;
+  poll?: ApiMessagePoll;
   webPage?: ApiWebPage;
   story?: ApiTypeStory;
   canSendNow?: boolean;
@@ -86,6 +91,7 @@ type OwnProps = {
   canTranslate?: boolean;
   canShowOriginal?: boolean;
   canSelectLanguage?: boolean;
+  currentTranslationTone?: TranslationTone;
   isPrivate?: boolean;
   isCurrentUserPremium?: boolean;
   canDownload?: boolean;
@@ -128,6 +134,7 @@ type OwnProps = {
   onShowSeenBy?: NoneToVoidFunction;
   onShowReactors?: NoneToVoidFunction;
   onTranslate?: NoneToVoidFunction;
+  onTranslateWithTone?: (tone: TranslationTone) => void;
   onShowOriginal?: NoneToVoidFunction;
   onSelectLanguage?: NoneToVoidFunction;
   onToggleReaction?: (reaction: ApiReaction) => void;
@@ -150,6 +157,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   defaultTagReactions,
   isOpen,
   message,
+  chat,
   poll,
   webPage,
   story,
@@ -185,6 +193,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   canTranslate,
   canShowOriginal,
   canSelectLanguage,
+  currentTranslationTone,
   isDownloading,
   repliesThreadInfo,
   canShowSeenBy,
@@ -227,6 +236,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   onCopyMessages,
   onReactionPickerOpen,
   onTranslate,
+  onTranslateWithTone,
   onShowOriginal,
   onSelectLanguage,
   userFullName,
@@ -251,6 +261,22 @@ const MessageContextMenu: FC<OwnProps> = ({
   const isStarGiftUnique = message.content.action?.type === 'starGiftUnique';
   const shouldShowGiftButton = isUserId(message.chatId)
     && canGift && (isPremiumGift || isGiftCode || isStarGift || isStarGiftUnique);
+  const pollCountryRestrictionMessage = useMemo(
+    () => getPollCountryRestrictionMessage(lang, poll?.summary.allowedCountryCodes),
+    [lang, poll?.summary.allowedCountryCodes],
+  );
+  const pollSubscriberRestrictionChannel = chat && getPeerTitle(lang, chat);
+  const pollSubscriberRestrictionMessage = useMemo(
+    () => getPollSubscriberRestrictionMessage(
+      pollSubscriberRestrictionChannel,
+      poll?.summary.isRestrictedToSubscribers,
+    ),
+    [poll?.summary.isRestrictedToSubscribers, pollSubscriberRestrictionChannel],
+  );
+  const hasPollRestrictionMessage = Boolean(pollSubscriberRestrictionMessage) || Boolean(pollCountryRestrictionMessage);
+  const shouldRenderInfoSection = Boolean(
+    canLoadReadDate || shouldRenderShowWhen || isEdited || noForwardsNotice || hasPollRestrictionMessage,
+  );
 
   const [isReady, markIsReady, unmarkIsReady] = useFlag();
   const { isMobile } = useAppLayout();
@@ -337,10 +363,14 @@ const MessageContextMenu: FC<OwnProps> = ({
       return;
     }
 
-    setTimeout(() => {
+    const timeout = setTimeout(() => {
       markIsReady();
     }, ANIMATION_DURATION);
-  }, [isOpen, markIsReady, unmarkIsReady]);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     return disableScrolling(scrollableRef.current, '.ReactionPicker');
@@ -431,11 +461,46 @@ const MessageContextMenu: FC<OwnProps> = ({
         {canUnfaveSticker && (
           <MenuItem icon="favorite" onClick={onUnfaveSticker}>{oldLang('Stickers.RemoveFromFavorites')}</MenuItem>
         )}
-        {canTranslate && <MenuItem icon="language" onClick={onTranslate}>{oldLang('TranslateMessage')}</MenuItem>}
+        {canTranslate && (
+          <MenuItem icon="language" onClick={() => onTranslate?.()}>{oldLang('TranslateMessage')}</MenuItem>
+        )}
         {canShowOriginal && (
           <MenuItem icon="language" onClick={onShowOriginal}>
             {oldLang('ShowOriginalButton')}
           </MenuItem>
+        )}
+        {canShowOriginal && (
+          <NestedMenuItem
+            icon="tone"
+            submenuClassName="translation-tone-menu"
+            submenu={(
+              <>
+                <MenuItem
+                  icon={currentTranslationTone === 'neutral' ? 'message-succeeded' : undefined}
+                  customIcon={currentTranslationTone !== 'neutral' ? <Icon name="placeholder" /> : undefined}
+                  onClick={() => onTranslateWithTone?.('neutral')}
+                >
+                  {lang('TranslationToneNeutral')}
+                </MenuItem>
+                <MenuItem
+                  icon={currentTranslationTone === 'formal' ? 'message-succeeded' : undefined}
+                  customIcon={currentTranslationTone !== 'formal' ? <Icon name="placeholder" /> : undefined}
+                  onClick={() => onTranslateWithTone?.('formal')}
+                >
+                  {lang('TranslationToneFormal')}
+                </MenuItem>
+                <MenuItem
+                  icon={currentTranslationTone === 'casual' ? 'message-succeeded' : undefined}
+                  customIcon={currentTranslationTone !== 'casual' ? <Icon name="placeholder" /> : undefined}
+                  onClick={() => onTranslateWithTone?.('casual')}
+                >
+                  {lang('TranslationToneCasual')}
+                </MenuItem>
+              </>
+            )}
+          >
+            {lang('TranslationTone')}
+          </NestedMenuItem>
         )}
         {canSelectLanguage && (
           <MenuItem icon="web" onClick={onSelectLanguage}>{oldLang('lng_settings_change_lang')}</MenuItem>
@@ -530,7 +595,7 @@ const MessageContextMenu: FC<OwnProps> = ({
             </MenuItem>
           </>
         )}
-        {(canLoadReadDate || shouldRenderShowWhen || isEdited || noForwardsNotice) && (
+        {shouldRenderInfoSection && (
           <MenuSeparator size={hasCustomEmoji ? 'thin' : 'thick'} />
         )}
         {(canLoadReadDate || shouldRenderShowWhen) && (
@@ -545,6 +610,16 @@ const MessageContextMenu: FC<OwnProps> = ({
           <LastEditTimeMenuItem
             message={message}
           />
+        )}
+        {pollSubscriberRestrictionMessage && (
+          <MenuItem disabled withWrap className="poll-subscriber-restriction-notice">
+            {lang.with(pollSubscriberRestrictionMessage)}
+          </MenuItem>
+        )}
+        {pollCountryRestrictionMessage && (
+          <MenuItem disabled withWrap className="poll-country-restriction-notice">
+            {lang.with(pollCountryRestrictionMessage)}
+          </MenuItem>
         )}
         {noForwardsNotice && (
           <MenuItem disabled withWrap className="no-forwards-notice">

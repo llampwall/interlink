@@ -41,7 +41,7 @@ const EmojiInteractionAnimation: FC<OwnProps & StateProps> = ({
 
   const [isHiding, startHiding] = useFlag(false);
   const [isPlaying, startPlaying] = useFlag(false);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<number>();
 
   const stop = useLastCallback(() => {
     startHiding();
@@ -80,7 +80,12 @@ const EmojiInteractionAnimation: FC<OwnProps & StateProps> = ({
       stop();
       endHeavyAnimation();
     }, PLAYING_DURATION);
-  }, [stop]);
+
+    return () => {
+      clearTimeout(timeoutRef.current);
+      endHeavyAnimation();
+    };
+  }, []);
 
   const effectHash = effectAnimationId && `sticker${effectAnimationId}`;
   const effectTgsUrl = useMedia(effectHash, !effectAnimationId);

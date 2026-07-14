@@ -1,4 +1,6 @@
 import type {
+  ApiAiComposeTone,
+  ApiAiComposeToneExample,
   ApiAttachBot,
   ApiBirthday,
   ApiBoost,
@@ -10,13 +12,14 @@ import type {
   ApiChatType,
   ApiCheckedGiftCode,
   ApiCollectibleInfo,
-  ApiContact,
+  ApiComposedMessageWithAI,
+  ApiDialog,
   ApiEmojiStatusCollectible,
-  ApiError,
   ApiFormattedText,
   ApiGeoPoint,
   ApiGlobalMessageSearchType,
   ApiGroupStatistics,
+  ApiInputAiComposeTone,
   ApiInputInvoice,
   ApiLimitTypeWithModal,
   ApiMessage,
@@ -81,7 +84,9 @@ import type {
   ManagementState,
   MediaViewerMedia,
   MediaViewerOrigin,
+  MediaViewerPageMedia,
   MessageList,
+  MessageListType,
   MiddleSearchParams,
   NewChatMembersProgress,
   PaymentStep,
@@ -106,6 +111,17 @@ import type { CallbackAction } from './actions';
 export type PollVote = {
   peerId: string;
   date: number;
+};
+
+export type ReactionDeletionContext = {
+  peerId: string;
+  count: number;
+};
+
+export type AiEditorTabBase = {
+  isLoading?: boolean;
+  result?: ApiComposedMessageWithAI;
+  error?: 'floodPremium' | 'aiError' | 'generic';
 };
 
 export type TabState = {
@@ -373,6 +389,7 @@ export type TabState = {
     isAvatarView?: boolean;
     isSponsoredMessage?: boolean;
     standaloneMedia?: MediaViewerMedia[];
+    pageMedia?: MediaViewerPageMedia;
     origin?: MediaViewerOrigin;
     volume: number;
     playbackRate: number;
@@ -393,6 +410,9 @@ export type TabState = {
   };
 
   webPagePreviewId?: string;
+  instantViewModal?: {
+    webPageId: string;
+  };
 
   loadingThread?: {
     loadingChatId: string;
@@ -490,7 +510,7 @@ export type TabState = {
   };
 
   notifications: ApiNotification[];
-  dialogs: (ApiError | ApiContact)[];
+  dialogs: ApiDialog[];
 
   safeLinkModalUrl?: string;
   mapModal?: {
@@ -561,8 +581,10 @@ export type TabState = {
     filter?: ApiChatType[];
   };
 
-  pollModal: {
-    isOpen: boolean;
+  pollModal?: {
+    chatId: string;
+    threadId?: ThreadId;
+    messageListType: MessageListType;
     isQuiz?: boolean;
   };
 
@@ -614,6 +636,10 @@ export type TabState = {
     filter: ApiChatType[];
     startParam?: string;
   };
+  requestedBotStartGroup?: {
+    bot: ApiUser;
+    startParam?: string;
+  };
 
   emojiStatusAccessModal?: {
     bot: ApiUser;
@@ -663,6 +689,48 @@ export type TabState = {
     gift?: ApiStarGift;
   };
 
+  aiMessageEditorModal?: {
+    chatId: string;
+    text: ApiFormattedText;
+    activeTab: 'translate' | 'style' | 'fix';
+    isFromAttachment?: boolean;
+    translateTab?: AiEditorTabBase & {
+      selectedLanguage?: string;
+      selectedTone?: ApiInputAiComposeTone;
+      shouldEmojify?: boolean;
+      cache?: Record<string, ApiComposedMessageWithAI>;
+    };
+    styleTab?: AiEditorTabBase & {
+      selectedTone?: ApiInputAiComposeTone;
+      shouldEmojify?: boolean;
+      cache?: Record<string, ApiComposedMessageWithAI>;
+    };
+    fixTab?: AiEditorTabBase & {
+      cache?: ApiComposedMessageWithAI;
+    };
+  };
+
+  aiToneEditorModal?: {
+    toneToEdit?: ApiAiComposeTone;
+  };
+
+  aiTonePreviewModal?: {
+    slug: string;
+    tone?: ApiAiComposeTone;
+    example?: ApiAiComposeToneExample;
+    isAlreadyAdded?: boolean;
+    hasExampleError?: boolean;
+  };
+
+  aiMessageEditorPendingResult?: {
+    text?: ApiFormattedText;
+    shouldClear?: boolean;
+    shouldSendWithAttachments?: boolean;
+    isSilent?: boolean;
+    scheduledAt?: number;
+    scheduleRepeatPeriod?: number;
+  };
+
   giveawayModal?: {
     chatId: string;
     isOpen?: boolean;
@@ -678,6 +746,7 @@ export type TabState = {
     messageIds: number[];
     isSchedule?: boolean;
     onConfirm?: NoneToVoidFunction;
+    reactionContext?: ReactionDeletionContext;
   };
 
   isWebAppsCloseConfirmationModalOpen?: boolean;

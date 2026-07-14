@@ -76,7 +76,24 @@
     transform: translateY(calc(-100% - 0.5rem));
   }
 
-  .no-forwards-notice {
+  .TranslationToneSelector {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    transform: translateX(0.5rem);
+  }
+
+  .no-forwards-notice,
+  .poll-subscriber-restriction-notice,
+  .poll-country-restriction-notice {
     min-width: 12rem;
+  }
+}
+
+.translation-tone-menu .bubble {
+  min-width: 0;
+
+  .icon {
+    margin-inline: 0.25rem;
   }
 }

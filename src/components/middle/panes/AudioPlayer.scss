@@ -17,7 +17,7 @@
   .player-button {
     --color-text-secondary: var(--color-primary);
     --color-text-secondary-rgb: var(--color-primary-shade-rgb);
-    --color-primary-shade: var(--color-green);
+    --color-primary-shade: var(--color-active);
     --color-white: var(--color-background-own);
 
     margin: 0.125rem;
@@ -229,10 +229,20 @@
   &.full-width-player {
     @include mixins.middle-header-pane;
 
+    height: 3rem;
+
     .AudioPlayer-content {
       flex-grow: 1;
+      align-self: stretch;
+
       max-width: none;
+      padding-left: 0.75rem;
+      border-radius: var(--pane-content-radius);
     }
+  }
+
+  &.full-width-player.settled {
+    transform: translateY(0);
   }
 
   .playback-rate-menu .bubble {

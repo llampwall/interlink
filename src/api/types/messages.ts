@@ -4,8 +4,9 @@ import type {
   ApiBotInlineResult,
   ApiWebDocument,
 } from './bots';
+import type { ApiInstantViewPage, ApiPageBlock } from './instantView';
 import type { ApiMessageAction } from './messageActions';
-import type { ApiPeerNotifySettings, ApiRestrictionReason } from './misc';
+import type { ApiAttachment, ApiPeerNotifySettings, ApiRestrictionReason } from './misc';
 import type {
   ApiLabeledPrice,
 } from './payments';
@@ -20,6 +21,15 @@ export interface ApiDimensions {
   width: number;
   height: number;
 }
+
+export type ApiMessageReadMetric = {
+  messageId: number;
+  viewId: string;
+  timeInViewMs: number;
+  activeTimeInViewMs: number;
+  heightToViewportRatioPermille: number;
+  seenRangeRatioPermille: number;
+};
 
 export interface ApiPhotoSize extends ApiDimensions {
   type: 's' | 'm' | 'x' | 'y' | 'w';
@@ -59,7 +69,6 @@ export interface ApiSticker {
   height?: number;
   thumbnail?: ApiThumbnail;
   previewPhotoSizes?: ApiPhotoSize[];
-  isPreloadedGlobally?: boolean;
   hasEffect?: boolean;
   isFree?: boolean;
   shouldUseTextColor?: boolean;
@@ -186,6 +195,9 @@ export type ApiPaidMedia = {
 export interface ApiPollAnswer {
   text: ApiFormattedText;
   option: string;
+  media?: MediaContent;
+  addedByPeerId?: string;
+  date?: number;
 }
 
 export interface ApiPollResult {
@@ -193,29 +205,44 @@ export interface ApiPollResult {
   isCorrect?: true;
   option: string;
   votersCount: number;
+  recentVoterIds?: string[];
 }
 
 export interface ApiPoll {
-  mediaType: 'poll';
   id: string;
-  summary: {
-    closed?: true;
-    isPublic?: true;
-    multipleChoice?: true;
-    quiz?: true;
-    question: ApiFormattedText;
-    answers: ApiPollAnswer[];
-    closePeriod?: number;
-    closeDate?: number;
-  };
-  results: {
-    isMin?: true;
-    results?: ApiPollResult[];
-    totalVoters?: number;
-    recentVoterIds?: string[];
-    solution?: string;
-    solutionEntities?: ApiMessageEntity[];
-  };
+  hash: string;
+  isClosed?: true;
+  isPublic?: true;
+  isMultipleChoice?: true;
+  isQuiz?: true;
+  canAddAnswers?: true;
+  isRevoteDisabled?: true;
+  shouldShuffleAnswers?: true;
+  shouldHideResultsUntilClose?: true;
+  isCreator?: true;
+  isRestrictedToSubscribers?: true;
+  allowedCountryCodes?: string[];
+  question: ApiFormattedText;
+  answers: ApiPollAnswer[];
+  closePeriod?: number;
+  closeDate?: number;
+}
+
+export interface ApiPollResults {
+  isMin?: true;
+  resultByOption?: Record<string, ApiPollResult>;
+  totalVoters?: number;
+  recentVoterIds?: string[];
+  solution?: string;
+  solutionEntities?: ApiMessageEntity[];
+  solutionMedia?: MediaContent;
+}
+
+export interface ApiMessagePoll {
+  mediaType: 'poll';
+  summary: ApiPoll;
+  results: ApiPollResults;
+  attachedMedia?: MediaContent;
 }
 
 export interface ApiInvoice {
@@ -339,12 +366,12 @@ export type ApiGiveawayResults = {
 };
 
 export type ApiNewPoll = {
-  summary: ApiPoll['summary'];
-  quiz?: {
-    correctAnswers: string[];
-    solution?: string;
-    solutionEntities?: ApiMessageEntity[];
-  };
+  summary: ApiPoll;
+  correctAnswers?: number[];
+  solution?: string;
+  solutionEntities?: ApiMessageEntity[];
+  attachedMedia?: ApiAttachment;
+  solutionMedia?: ApiAttachment;
 };
 
 export interface ApiTodoItem {
@@ -396,6 +423,7 @@ export interface ApiWebPageFull {
   webpageType: 'full';
   id: string;
   url: string;
+  hash: number;
   displayUrl: string;
   type?: string;
   siteName?: string;
@@ -410,6 +438,8 @@ export interface ApiWebPageFull {
   gift?: ApiStarGiftUnique;
   auction?: ApiWebPageAuctionData;
   stickers?: ApiWebPageStickerData;
+  cachedPage?: ApiInstantViewPage;
+  aiComposeToneEmojiId?: string;
   hasLargeMedia?: boolean;
 }
 
@@ -510,7 +540,8 @@ export type ApiMessageEntityDefault = {
   `${ApiMessageEntityTypes}`,
   `${ApiMessageEntityTypes.Pre}` | `${ApiMessageEntityTypes.TextUrl}` | `${ApiMessageEntityTypes.MentionName}` |
   `${ApiMessageEntityTypes.Blockquote}` | `${ApiMessageEntityTypes.CustomEmoji}` |
-  `${ApiMessageEntityTypes.Timestamp}` | `${ApiMessageEntityTypes.FormattedDate}`
+  `${ApiMessageEntityTypes.Timestamp}` | `${ApiMessageEntityTypes.FormattedDate}` |
+  `${ApiMessageEntityTypes.DiffInsert}` | `${ApiMessageEntityTypes.DiffReplace}` | `${ApiMessageEntityTypes.DiffDelete}`
   >;
   offset: number;
   length: number;
@@ -572,9 +603,28 @@ export type ApiMessageEntityTimestamp = {
   timestamp: number;
 };
 
+export type ApiMessageEntityDiffInsert = {
+  type: ApiMessageEntityTypes.DiffInsert;
+  offset: number;
+  length: number;
+};
+
+export type ApiMessageEntityDiffReplace = {
+  type: ApiMessageEntityTypes.DiffReplace;
+  offset: number;
+  length: number;
+  oldText: string;
+};
+
+export type ApiMessageEntityDiffDelete = {
+  type: ApiMessageEntityTypes.DiffDelete;
+  offset: number;
+  length: number;
+};
+
 export type ApiMessageEntity = ApiMessageEntityDefault | ApiMessageEntityPre | ApiMessageEntityTextUrl |
   ApiMessageEntityMentionName | ApiMessageEntityCustomEmoji | ApiMessageEntityBlockquote | ApiMessageEntityTimestamp |
-  ApiMessageEntityFormattedDate;
+  ApiMessageEntityFormattedDate | ApiMessageEntityDiffInsert | ApiMessageEntityDiffReplace | ApiMessageEntityDiffDelete;
 
 export enum ApiMessageEntityTypes {
   Bold = 'MessageEntityBold',
@@ -599,6 +649,9 @@ export enum ApiMessageEntityTypes {
   QuoteFocus = 'MessageEntityQuoteFocus',
   FormattedDate = 'MessageEntityFormattedDate',
   Unknown = 'MessageEntityUnknown',
+  DiffInsert = 'MessageEntityDiffInsert',
+  DiffReplace = 'MessageEntityDiffReplace',
+  DiffDelete = 'MessageEntityDiffDelete',
 }
 
 export interface ApiFormattedText {
@@ -610,8 +663,59 @@ export interface ApiFormattedTextWithEmojiOnlyCount extends ApiFormattedText {
   emojiOnlyCount?: number;
 }
 
+export interface ApiRichMessage {
+  blocks: ApiPageBlock[];
+  isRtl?: true;
+  isPart?: true;
+  partCutoff?: number;
+}
+
+export type ApiInputAiComposeTone = {
+  type: 'default';
+  tone: string;
+} | {
+  type: 'id';
+  id: string;
+  accessHash: string;
+} | {
+  type: 'slug';
+  slug: string;
+};
+
+export interface ApiAiComposeToneExample {
+  from: ApiFormattedText;
+  to: ApiFormattedText;
+}
+
+export interface ApiAiComposeTone {
+  id: string;
+  accessHash: string;
+  slug: string;
+  title: string;
+  isCreator?: true;
+  emojiId?: string;
+  prompt?: string;
+  installsCount?: number;
+  authorId?: string;
+  exampleEnglish?: ApiAiComposeToneExample;
+}
+
+export interface ApiAiComposeToneDefault {
+  tone: string;
+  emojiId: string;
+  title: string;
+}
+
+export type ApiAiComposeToneType = ApiAiComposeTone | ApiAiComposeToneDefault;
+
+export interface ApiComposedMessageWithAI {
+  resultText: ApiFormattedText;
+  diffText?: ApiFormattedText;
+}
+
 export type MediaContent = {
   text?: ApiFormattedTextWithEmojiOnlyCount;
+  richMessage?: ApiRichMessage;
   photo?: ApiPhoto;
   video?: ApiVideo;
   document?: ApiDocument;
@@ -638,7 +742,7 @@ export type MediaContainer = {
 };
 
 export type StatefulMediaContent = {
-  poll?: ApiPoll;
+  poll?: ApiMessagePoll;
   story?: ApiStory;
   webPage?: ApiWebPage;
 };
@@ -682,6 +786,7 @@ export interface ApiMessage {
   isKeyboardSelective?: boolean;
   viaBotId?: string;
   viaBusinessBotId?: string;
+  guestChatViaId?: string;
   postAuthorTitle?: string;
   isScheduled?: boolean;
   scheduleRepeatPeriod?: number;
@@ -717,6 +822,7 @@ export interface ApiMessage {
   fromRank?: string;
 
   isTypingDraft?: boolean; // Local field
+  wasTypingDraft?: boolean; // Local field
 }
 
 export interface ApiReactions {

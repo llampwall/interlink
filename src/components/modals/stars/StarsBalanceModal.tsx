@@ -26,6 +26,7 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
+import GramIcon from '../../common/icons/GramIcon';
 import Icon from '../../common/icons/Icon';
 import SafeLink from '../../common/SafeLink';
 import Button from '../../ui/Button';
@@ -81,7 +82,7 @@ const StarsBalanceModal = ({
   const oldLang = useOldLang();
   const lang = useLang();
 
-  const [isHeaderHidden, setHeaderHidden] = useState(true);
+  const [isHeaderHidden, setIsHeaderHidden] = useState(true);
   const [areTabsPinned, pinTabs, unpinTabs] = useFlag(false);
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
   const [areBuyOptionsShown, showBuyOptions, hideBuyOptions] = useFlag();
@@ -162,7 +163,7 @@ const StarsBalanceModal = ({
 
   useEffect(() => {
     if (!isOpen) {
-      setHeaderHidden(true);
+      setIsHeaderHidden(true);
       setSelectedTabIndex(0);
       hideBuyOptions();
       unpinTabs();
@@ -241,13 +242,13 @@ const StarsBalanceModal = ({
         <ParticlesHeader
           model="speeding-diamond"
           color="blue"
-          title={lang('CurrencyTon')}
-          description={lang('DescriptionAboutTon')}
+          title={lang('CurrencyGram')}
+          description={lang('DescriptionAboutGram')}
           isDisabled={!isOpen}
         />
         <div className={styles.tonBalanceContainer}>
           <div className={styles.tonBalance}>
-            <Icon name="toncoin" className={styles.tonIconBalance} />
+            <GramIcon className={styles.tonIconBalance} />
             {tonAmount}
           </div>
           {Boolean(tonUsdRate) && (
@@ -270,7 +271,7 @@ const StarsBalanceModal = ({
 
         {currency === TON_CURRENCY_CODE && (
           <div className={styles.hint}>
-            {lang('TonModalHint')}
+            {lang('GramModalHint')}
           </div>
         )}
       </>
@@ -280,7 +281,7 @@ const StarsBalanceModal = ({
   function handleScroll(e: React.UIEvent<HTMLDivElement>) {
     const { scrollTop } = e.currentTarget;
 
-    setHeaderHidden(scrollTop <= 150);
+    setIsHeaderHidden(scrollTop <= 150);
 
     if (tabsRef.current) {
       const { top: tabsTop } = tabsRef.current.getBoundingClientRect();

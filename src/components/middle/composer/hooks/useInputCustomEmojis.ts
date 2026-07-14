@@ -1,3 +1,4 @@
+import Color from 'colorjs.io';
 import type {
   ElementRef } from '../../../../lib/teact/teact';
 import {
@@ -12,7 +13,6 @@ import { requestMeasure } from '../../../../lib/fasterdom/fasterdom';
 import { ensureRLottie } from '../../../../lib/rlottie/RLottie.async';
 import { selectCustomEmoji, selectIsAlwaysHighPriorityEmoji } from '../../../../global/selectors';
 import AbsoluteVideo from '../../../../util/AbsoluteVideo';
-import { hex2rgbaObj } from '../../../../util/colors.ts';
 import {
   addCustomEmojiInputRenderCallback,
   getCustomEmojiMediaDataForInput,
@@ -53,14 +53,14 @@ export default function useInputCustomEmojis(
   const customColor = useDynamicColorListener(inputRef, undefined, !isReady);
   const colorFilter = useColorFilter(customColor, true);
   const dpr = useDevicePixelRatio();
-  const playersById = useRef<Map<string, CustomEmojiPlayer>>(new Map());
+  const playersByIdRef = useRef<Map<string, CustomEmojiPlayer>>(new Map());
 
   const clearPlayers = useLastCallback((ids: string[]) => {
     ids.forEach((id) => {
-      const player = playersById.current.get(id);
+      const player = playersByIdRef.current.get(id);
       if (player) {
         player.destroy();
-        playersById.current.delete(id);
+        playersByIdRef.current.delete(id);
       }
     });
   });
@@ -69,7 +69,7 @@ export default function useInputCustomEmojis(
     if (!isReady || !inputRef.current || !sharedCanvasRef.current || !sharedCanvasHqRef.current) return;
 
     const global = getGlobal();
-    const playerIdsToClear = new Set(playersById.current.keys());
+    const playerIdsToClear = new Set(playersByIdRef.current.keys());
     const customEmojis = Array.from(inputRef.current.querySelectorAll<HTMLElement>('.custom-emoji'));
 
     customEmojis.forEach((element) => {
@@ -91,8 +91,8 @@ export default function useInputCustomEmojis(
       const x = round((elementBounds.left - canvasBounds.left) / canvasBounds.width, 4);
       const y = round((elementBounds.top - canvasBounds.top) / canvasBounds.height, 4);
 
-      if (playersById.current.has(playerId)) {
-        const player = playersById.current.get(playerId)!;
+      if (playersByIdRef.current.has(playerId)) {
+        const player = playersByIdRef.current.get(playerId)!;
         player.updatePosition(x, y);
         return;
       }
@@ -123,7 +123,7 @@ export default function useInputCustomEmojis(
           animation.play();
         }
 
-        playersById.current.set(playerId, animation);
+        playersByIdRef.current.set(playerId, animation);
       });
     });
 
@@ -135,7 +135,7 @@ export default function useInputCustomEmojis(
   }, [synchronizeElements]);
 
   useEffect(() => {
-    const activePlayersById = playersById.current;
+    const activePlayersById = playersByIdRef.current;
     // Always clear players on unmount
     return () => {
       clearPlayers(Array.from(activePlayersById.keys()));
@@ -144,7 +144,7 @@ export default function useInputCustomEmojis(
 
   useEffect(() => {
     if (!getHtml() || !inputRef.current || !sharedCanvasRef.current || !isActive || !isReady) {
-      clearPlayers(Array.from(playersById.current.keys()));
+      clearPlayers(Array.from(playersByIdRef.current.keys()));
       return;
     }
 
@@ -173,13 +173,13 @@ export default function useInputCustomEmojis(
   useResizeObserver(sharedCanvasRef, throttledSynchronizeElements);
   useEffectWithPrevDeps(([prevDpr]) => {
     if (dpr !== prevDpr) {
-      clearPlayers(Array.from(playersById.current.keys()));
+      clearPlayers(Array.from(playersByIdRef.current.keys()));
       synchronizeElements();
     }
   }, [dpr, synchronizeElements]);
 
   const freezeAnimation = useLastCallback(() => {
-    playersById.current.forEach((player) => {
+    playersByIdRef.current.forEach((player) => {
       player.pause();
     });
   });
@@ -189,7 +189,7 @@ export default function useInputCustomEmojis(
       return;
     }
 
-    playersById.current?.forEach((player) => {
+    playersByIdRef.current.forEach((player) => {
       player.play();
     });
   });
@@ -230,7 +230,7 @@ async function createPlayer({
   colorFilter?: string;
 }): Promise<CustomEmojiPlayer> {
   if (customEmoji.isLottie) {
-    const color = customEmoji.shouldUseTextColor && textColor ? hex2rgbaObj(textColor) : undefined;
+    const color = customEmoji.shouldUseTextColor && textColor ? new Color(textColor) : undefined;
     const RLottie = await ensureRLottie();
     const lottie = RLottie.init(
       mediaUrl,
@@ -242,7 +242,7 @@ async function createPlayer({
         isLowPriority: !isHq,
       },
       viewId,
-      color ? [color.r, color.g, color.b] : undefined,
+      color,
     );
 
     return {

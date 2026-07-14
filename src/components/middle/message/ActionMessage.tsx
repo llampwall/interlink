@@ -102,6 +102,7 @@ type StateProps = {
   isCurrentUserPremium?: boolean;
   isInSelectMode?: boolean;
   hasUnreadReaction?: boolean;
+  hasUnreadPollVote?: boolean;
   isResizingContainer?: boolean;
   scrollTargetPosition?: ScrollTargetPosition;
   isAccountFrozen?: boolean;
@@ -112,12 +113,16 @@ const SINGLE_LINE_ACTIONS = new Set<ApiMessageAction['type']>([
   'pinMessage',
   'chatEditPhoto',
   'chatDeletePhoto',
-  'todoCompletions',
-  'todoAppendTasks',
   'unsupported',
 ]);
 const HIDDEN_TEXT_ACTIONS = new Set<ApiMessageAction['type']>(['giftCode', 'prizeStars',
   'suggestProfilePhoto', 'suggestedPostApproval', 'starGiftPurchaseOffer', 'noForwardsRequest']);
+const WITH_LINK_BREAKS_ACTIONS = new Set<ApiMessageAction['type']>([
+  'todoCompletions',
+  'todoAppendTasks',
+  'pollAppendAnswer',
+  'pollDeleteAnswer',
+]);
 
 const ActionMessage = ({
   message,
@@ -138,6 +143,7 @@ const ActionMessage = ({
   isCurrentUserPremium,
   isInSelectMode,
   hasUnreadReaction,
+  hasUnreadPollVote,
   isResizingContainer,
   scrollTargetPosition,
   isAccountFrozen,
@@ -159,6 +165,7 @@ const ActionMessage = ({
     toggleChannelRecommendations,
     animateUnreadReaction,
     markMentionsRead,
+    markPollVotesRead,
     focusMessage,
     openGiftOfferAcceptModal,
     declineStarGiftOffer,
@@ -174,6 +181,7 @@ const ActionMessage = ({
 
   const isTextHidden = HIDDEN_TEXT_ACTIONS.has(action.type);
   const isSingleLine = SINGLE_LINE_ACTIONS.has(action.type);
+  const withLinkBreaks = WITH_LINK_BREAKS_ACTIONS.has(action.type);
   const isFluidMultiline = IS_FLUID_BACKGROUND_SUPPORTED && !isSingleLine;
   const isClickableText = action.type === 'suggestedPostSuccess';
   const isNarrowMessage = action.type === 'starGiftPurchaseOfferDeclined';
@@ -309,8 +317,9 @@ const ActionMessage = ({
       return;
     }
 
+    // Message appearance animation works only if this timeout is not cleared
     setTimeout(markShown, appearanceOrder * MESSAGE_APPEARANCE_DELAY);
-  }, [appearanceOrder, markShown, noAppearanceAnimation]);
+  }, [appearanceOrder, noAppearanceAnimation]);
 
   const { ref: refWithTransition } = useShowTransition({
     isOpen: isShown,
@@ -332,10 +341,22 @@ const ActionMessage = ({
       animateUnreadReaction({ chatId, messageIds: [id] });
     }
 
+    if (hasUnreadPollVote) {
+      markPollVotesRead({ chatId, messageIds: [id] });
+    }
+
     if (message.hasUnreadMention) {
       markMentionsRead({ chatId, messageIds: [id] });
     }
-  }, [hasUnreadReaction, chatId, id, animateUnreadReaction, message.hasUnreadMention]);
+  }, [
+    hasUnreadReaction,
+    hasUnreadPollVote,
+    chatId,
+    id,
+    animateUnreadReaction,
+    markPollVotesRead,
+    message.hasUnreadMention,
+  ]);
 
   useEffect(() => {
     if (action.type !== 'giftPremium') return;
@@ -607,6 +628,7 @@ const ActionMessage = ({
         'message-list-item',
         styles.root,
         isSingleLine && styles.singleLine,
+        withLinkBreaks && styles.withLinkBreaks,
         isFluidMultiline && styles.fluidMultiline,
         fullContent && styles.hasFullContent,
         isFocused && !noFocusHighlight && 'focused',
@@ -616,6 +638,7 @@ const ActionMessage = ({
       data-message-id={message.id}
       data-is-pinned={message.isPinned || undefined}
       data-has-unread-mention={message.hasUnreadMention || undefined}
+      data-has-unread-poll-vote={hasUnreadPollVote || undefined}
       data-has-unread-reaction={hasUnreadReaction || undefined}
       onMouseDown={handleMouseDown}
       onContextMenu={handleContextMenu}
@@ -734,6 +757,7 @@ export default memo(withGlobal<OwnProps>(
 
     const readState = selectThreadReadState(global, message.chatId, threadId);
     const hasUnreadReaction = readState?.unreadReactions?.includes(message.id);
+    const hasUnreadPollVote = readState?.unreadPollVotes?.includes(message.id);
     const isAccountFrozen = selectIsCurrentUserFrozen(global);
 
     return {
@@ -748,6 +772,7 @@ export default memo(withGlobal<OwnProps>(
       isInSelectMode: selectIsInSelectMode(global),
       actionMessageBg: selectActionMessageBg(global),
       hasUnreadReaction,
+      hasUnreadPollVote,
       isResizingContainer,
       scrollTargetPosition,
       isAccountFrozen,

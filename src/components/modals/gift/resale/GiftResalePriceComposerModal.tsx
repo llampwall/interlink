@@ -9,8 +9,9 @@ import {
   selectStarsGiftResaleCommission,
   selectTonGiftResaleCommission,
 } from '../../../../global/selectors';
-import { convertTonFromNanos, convertTonToNanos } from '../../../../util/formatCurrency';
-import { convertTonToUsd, formatCurrencyAsString } from '../../../../util/formatCurrency';
+import {
+  convertTonFromNanos, convertTonToNanos, convertTonToUsd, formatCurrencyAsString,
+} from '../../../../util/formatCurrency';
 import { formatStarsAsIcon, formatStarsAsText, formatTonAsIcon,
   formatTonAsText } from '../../../../util/localization/format';
 
@@ -106,14 +107,14 @@ const GiftResalePriceComposerModal = ({
   return (
     <Modal
       isOpen={isOpen}
-      title={isPriceInTon ? lang('PriceInTON') : lang('PriceInStars')}
+      title={isPriceInTon ? lang('PriceInGram') : lang('PriceInStars')}
       hasCloseButton
       isSlim
       onClose={handleClose}
     >
       <div className={styles.inputPrice}>
         <InputText
-          label={isPriceInTon ? lang('EnterPriceInTon') : lang('EnterPriceInStars')}
+          label={isPriceInTon ? lang('EnterPriceInGram') : lang('EnterPriceInStars')}
           onChange={handleChangePrice}
           value={price?.toString()}
           inputMode="numeric"
@@ -158,13 +159,13 @@ const GiftResalePriceComposerModal = ({
 
       <Checkbox
         className={styles.checkBox}
-        label={lang('OnlyAcceptTON')}
+        label={lang('OnlyAcceptGram')}
         checked={isPriceInTon}
         onCheck={setIsPriceInTon}
       />
 
       <div className={styles.checkBoxDescription}>
-        {lang('OnlyAcceptTONDescription')}
+        {lang('OnlyAcceptGramDescription')}
       </div>
 
       <Button inline noForcedUpperCase disabled={!isPriceCorrect} onClick={handleSellGift}>

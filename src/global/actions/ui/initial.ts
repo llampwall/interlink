@@ -130,7 +130,6 @@ addActionHandler('initMain', (global): ActionReturnType => {
 });
 
 addCallback((global: GlobalState) => {
-  let isUpdated = false;
   const tabState = selectTabState(global, getCurrentTabId());
   if (!tabState?.shouldInit) return;
 
@@ -157,7 +156,7 @@ addCallback((global: GlobalState) => {
     document.documentElement.style.setProperty(
       '--composer-text-size', `${Math.max(messageTextSize, IS_IOS ? 16 : 15)}px`,
     );
-    document.documentElement.style.setProperty('--message-meta-height', `${Math.floor(messageTextSize * 1.3125)}px`);
+    document.documentElement.style.setProperty('--message-meta-height', `${Math.floor(messageTextSize * 1.25)}px`);
     document.documentElement.style.setProperty('--message-text-size', `${messageTextSize}px`);
     document.documentElement.setAttribute('data-message-text-size', messageTextSize.toString());
     document.body.classList.add('initial');
@@ -194,9 +193,7 @@ addCallback((global: GlobalState) => {
 
   startWebsync();
 
-  isUpdated = true;
-
-  if (isUpdated) setGlobal(global);
+  setGlobal(global);
 });
 
 addActionHandler('setInstallPrompt', (global, actions, payload): ActionReturnType => {
