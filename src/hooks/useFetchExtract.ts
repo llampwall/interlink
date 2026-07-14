@@ -5,7 +5,6 @@ import type { Signal } from '../util/signals';
 
 import { extractAndBuildAttachments, findSocialUrl } from '../util/fetchExtract';
 import parseHtmlAsFormattedText from '../util/parseHtmlAsFormattedText';
-
 import { useDebouncedResolver } from './useAsyncResolvers';
 import useDerivedSignal from './useDerivedSignal';
 import { useSignalEffect } from './useSignalEffect';
@@ -62,7 +61,6 @@ export default function useFetchExtract(getHtml: Signal<string>) {
     urlRef.current = socialUrl;
     abortRef.current = false;
     setStatus('loading');
-    console.log('[Fetch] Optimistic extraction started for:', socialUrl);
 
     extractAndBuildAttachments(socialUrl)
       .then((result) => {
@@ -72,16 +70,13 @@ export default function useFetchExtract(getHtml: Signal<string>) {
           setPlatform(result.platform);
           setThumbnail(result.thumbnail);
           setStatus('ready');
-          console.log(`[Fetch] Optimistic extraction ready: ${result.attachments.length} item(s) from ${result.platform}`);
         } else {
           setStatus('error');
-          console.warn('[Fetch] Optimistic extraction returned no media');
         }
       })
-      .catch((err) => {
+      .catch(() => {
         if (abortRef.current || urlRef.current !== socialUrl) return;
         setStatus('error');
-        console.error('[Fetch] Optimistic extraction failed:', err);
       });
   }, [getSocialUrl]);
 

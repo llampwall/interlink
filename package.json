@@ -124,6 +124,7 @@
     "music-metadata": "^11.12.3",
     "opus-recorder": "github:Ajaxy/opus-recorder#116830a",
     "qr-code-styling": "^1.9.2",
+    "serve-handler": "^6.1.7",
     "temml": "^0.13.3"
   },
   "browserslist": [

@@ -14,6 +14,7 @@
     "plugins",
     "*.config.ts",
     "*.config.js",
+    "serve.cjs",
     ".github/workflows/*.js",
     "deploy/*.js",
     "src/**/*.test.ts",

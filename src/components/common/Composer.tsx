@@ -57,7 +57,6 @@ import {
   getAllowedAttachmentOptions,
   getMediaFilename,
   getMediaHash,
-  getWebPagePhoto,
   getMessageDocumentPhoto,
   getMessagePhoto,
   getReactionKey,
@@ -123,12 +122,12 @@ import deleteLastCharacterOutsideSelection from '../../util/deleteLastCharacterO
 import calcTextLineHeightAndCount from '../../util/element/calcTextLineHeightAndCount';
 import { processMessageInputForCustomEmoji } from '../../util/emoji/customEmojiManager';
 import { isUserId } from '../../util/entities/ids';
+import { findSocialUrl } from '../../util/fetchExtract';
 import { fetchBlob } from '../../util/files';
 import focusEditableElement from '../../util/focusEditableElement';
 import { formatStarsAsIcon } from '../../util/localization/format';
 import { fetch } from '../../util/mediaLoader';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
-import { findSocialUrl } from '../../util/fetchExtract';
 import parseHtmlAsFormattedText from '../../util/parseHtmlAsFormattedText';
 import { insertHtmlInSelection } from '../../util/selection';
 import { getServerTime } from '../../util/serverTime';
@@ -149,8 +148,6 @@ import useTimeout from '../../hooks/schedulers/useTimeout';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useDerivedState from '../../hooks/useDerivedState';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
-import useThumbnail from '../../hooks/media/useThumbnail';
-import useMedia from '../../hooks/useMedia';
 import useFetchExtract from '../../hooks/useFetchExtract';
 import useFlag from '../../hooks/useFlag';
 import useForceUpdate from '../../hooks/useForceUpdate';
@@ -506,11 +503,6 @@ const Composer = ({
   const {
     fetchStatus, fetchPlatform, fetchThumbnail, consumeResult: consumeFetchResult,
   } = useFetchExtract(getHtml);
-  const fetchPreviewPhoto = getWebPagePhoto(webPagePreview);
-  const fetchThumbUrl = useThumbnail(fetchPreviewPhoto ? { content: webPagePreview! } : undefined);
-  const fetchMediaHash = fetchPreviewPhoto ? getMediaHash(fetchPreviewPhoto, 'pictogram') : undefined;
-  const fetchMediaUrl = useMedia(fetchMediaHash);
-  const fetchThumb = fetchMediaUrl || fetchThumbUrl || fetchThumbnail;
   const [isMounted, setIsMounted] = useState(false);
   const getSelectionRange = useGetSelectionRange(editableInputCssSelector);
   const lastMessageSendTimeSecondsRef = useRef<number>();
@@ -1389,7 +1381,6 @@ const Composer = ({
           const html = getHtml();
           setHtml(html.replace(socialUrl, `<a href="${socialUrl}">[link]</a>`));
         }
-        console.log(`[Fetch] Sending as ${extraction.platform} media (${currentAttachments.length} item(s))`);
       } else if (fetchStatus === 'loading') {
         // Extraction still in progress — let user know
         showNotification({ message: 'Still fetching media... try again in a moment' });
@@ -2273,9 +2264,9 @@ const Composer = ({
             />
             {fetchStatus !== 'idle' ? (
               <div style="display:flex;align-items:center;gap:0.625rem;padding:0.5rem 1rem">
-                {fetchThumb && (
+                {fetchThumbnail && (
                   <img
-                    src={fetchThumb}
+                    src={fetchThumbnail}
                     alt=""
                     style="width:2.5rem;height:2.5rem;border-radius:0.25rem;object-fit:cover;flex-shrink:0"
                   />
@@ -2283,12 +2274,15 @@ const Composer = ({
                 <div style="display:flex;flex-direction:column;gap:0.125rem;min-width:0">
                   {fetchStatus === 'loading' && (
                     <span style="font-size:0.8125rem;opacity:0.7">
-                      Fetching media{fetchPlatform ? ` from ${fetchPlatform}` : ''}...
+                      Fetching media
+                      {fetchPlatform ? ` from ${fetchPlatform}` : ''}
+                      ...
                     </span>
                   )}
                   {fetchStatus === 'ready' && (
                     <span style="font-size:0.8125rem;color:#4caf50">
-                      Media ready to send{fetchPlatform ? ` from ${fetchPlatform}` : ''}
+                      Media ready to send
+                      {fetchPlatform ? ` from ${fetchPlatform}` : ''}
                     </span>
                   )}
                   {fetchStatus === 'error' && (

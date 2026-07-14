@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
+
 const fs = require('fs');
 const path = require('path');
 const handler = require('serve-handler');
@@ -27,7 +29,6 @@ function copyPublicToDist() {
       fs.copyFileSync(srcPath, destPath);
     }
   }
-  console.log('Copied public assets to dist/');
 }
 
 copyPublicToDist();
@@ -60,6 +61,4 @@ const server = http.createServer((req, res) => {
   });
 });
 
-server.listen(8445, () => {
-  console.log('Interlink web server running on port 8445');
-});
+server.listen(8445);

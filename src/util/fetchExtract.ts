@@ -9,6 +9,7 @@ import type { ApiAttachment } from '../api/types';
 // Relative URLs — proxied through serve.cjs in production
 const FETCH_API_URL = '';
 
+// eslint-disable-next-line @stylistic/max-len
 const SOCIAL_URL_RE = /https?:\/\/(?:www\.)?(?:instagram\.com\/(?:p|reel|reels|stories)\/[\w-]+|(?:x\.com|twitter\.com)\/\w+\/status\/\d+|tiktok\.com\/@[\w.]+\/video\/\d+|(?:vm\.)?tiktok\.com\/[\w]+|(?:m\.)?youtube\.com\/(?:watch\?[\w=&]+|shorts\/[\w-]+)|youtu\.be\/[\w-]+|(?:old\.)?reddit\.com\/r\/\w+\/(?:comments|s)\/[\w]+|v\.redd\.it\/[\w]+|i\.redd\.it\/[\w.]+)[/\w\-?=&%.]*/i;
 
 interface ExtractedItem {
@@ -38,38 +39,25 @@ export function stripUrl(text: string, url: string): string {
 }
 
 async function callExtractApi(url: string): Promise<ExtractResult> {
-  console.log('[Fetch] Calling extract API for:', url);
-  const start = performance.now();
   const resp = await fetch(`${FETCH_API_URL}/extract?url=${encodeURIComponent(url)}`);
-  const result = await resp.json();
-  const elapsed = Math.round(performance.now() - start);
-  if (result.success) {
-    console.log(`[Fetch] API returned ${result.items?.length} item(s) from ${result.platform} in ${elapsed}ms`);
-  } else {
-    console.warn(`[Fetch] API failed in ${elapsed}ms:`, result.error);
-  }
-  return result;
+  return resp.json();
 }
 
 async function downloadBlob(fileUrl: string): Promise<Blob> {
-  console.log('[Fetch] Downloading:', fileUrl);
-  const start = performance.now();
   const resp = await fetch(`${FETCH_API_URL}${fileUrl}`);
-  const blob = await resp.blob();
-  const elapsed = Math.round(performance.now() - start);
-  console.log(`[Fetch] Downloaded ${(blob.size / 1024 / 1024).toFixed(1)}MB in ${elapsed}ms`);
-  return blob;
+  return resp.blob();
 }
 
 export async function extractAndBuildAttachments(
   socialUrl: string,
-): Promise<{ attachments: ApiAttachment[]; caption: string; platform: string } | undefined> {
-  console.log('[Fetch] Starting extraction for:', socialUrl);
-  const totalStart = performance.now();
-
+): Promise<{
+  attachments: ApiAttachment[];
+  caption: string;
+  platform: string;
+  thumbnail?: string;
+} | undefined> {
   const result = await callExtractApi(socialUrl);
   if (!result.success || !result.items?.length) {
-    console.warn('[Fetch] No media extracted, falling back to text send');
     return undefined;
   }
 
@@ -95,11 +83,7 @@ export async function extractAndBuildAttachments(
         : undefined,
     };
     attachments.push(attachment);
-    console.log(`[Fetch] Built attachment: ${item.type} ${item.width}x${item.height}`, isVideo ? `${item.duration}s` : '');
   }
-
-  const totalElapsed = Math.round(performance.now() - totalStart);
-  console.log(`[Fetch] Complete: ${attachments.length} attachment(s) ready in ${totalElapsed}ms`);
 
   return {
     attachments,
