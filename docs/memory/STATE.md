@@ -9,16 +9,16 @@ Maintain a custom fork of Telegram Web A (telegram-t) focused on a single "Main"
 ## Active Work
 - Main-only mode live: chat navigation, folder UI, and notifications (foreground + service worker) restricted to the "Main" Telegram folder, fail-closed if it's missing
 - Weekly automated upstream sync (`sync-upstream.yml`) merges Ajaxy/telegram-tt, validates (check+test+build), and pushes only on success
-- chinvex file-lookup index (`docs/sys/lookup.json`) and its CLAUDE.md pointer exist locally but are uncommitted
+- No new code commits since last update — only uncommitted working-tree changes: `CLAUDE.md` modified to point at `docs/sys/lookup.json`, plus untracked chinvex/session artifacts (`.chinvex-status.json`, `.claude/`, `docs/sys/`)
 
 ## Blockers
 None known
 
 ## Next Actions
-- [ ] Commit or discard the local-only chinvex lookup index (`docs/sys/lookup.json` + CLAUDE.md pointer)
-- [ ] Verify `sync-upstream.yml` runs cleanly on its first scheduled Monday run
+- [ ] Commit or discard the local-only chinvex lookup index (`docs/sys/lookup.json`) and the `CLAUDE.md` pointer edit
+- [ ] Resolve stray untracked `serve.js` — an incomplete duplicate of `serve.cjs` missing the Fetch proxy and dist-copy logic; delete or clarify its purpose
+- [ ] Clean up stray untracked cruft: `logs/` (424 files, growing), root file `8445`, stale worktree `.worktrees/loop-1783831370776-db43f9`
 - [ ] Confirm the SW notification allowlist (`setAllowedNotificationChatIds`) is posted correctly from `ChatFolders.tsx` on folder changes
-- [ ] Clean up untracked `logs/` restart-log cruft and stray root file `8445`
 - [ ] Re-confirm Fetch extraction end-to-end through cloudflared tunnel post-Vite-migration
 
 ## Quick Reference
@@ -33,6 +33,6 @@ None known
 
 ---
 Last memory update: 2026-07-17
-Commits covered through: 6851da16c58576bbbd20a1ec2d09dcc3449d5b99
+Commits covered through: 993035c08bce9a44bd4d8d53eafab0dea1d7525a
 
-<!-- chinvex:last-commit:6851da16c58576bbbd20a1ec2d09dcc3449d5b99 -->
+<!-- chinvex:last-commit:993035c08bce9a44bd4d8d53eafab0dea1d7525a -->
