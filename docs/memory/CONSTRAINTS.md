@@ -12,6 +12,7 @@
 - Bundler is Vite (`vite build`), migrated from webpack upstream (updated 2026-07-15)
 - Test runner is Vitest (`npm test` → `vitest run`), migrated from Jest upstream (updated 2026-07-15)
 - Weekly automated upstream sync via `.github/workflows/sync-upstream.yml` — merges `Ajaxy/telegram-tt` master every Monday 09:00 UTC (or manual dispatch), validates with `npm run check && npm test && npm run build:production`, pushes to `master` only if validation passes
+- Production URL: `https://interlink.unkndlabs.com`; `serve.cjs` binds port 8445 (added 2026-07-17)
 
 ## Rules
 - Do not use `null` in TypeScript — enforced by linter
@@ -46,6 +47,8 @@
 - `postinstall` clears `.cache/` on every `npm install` — expected behavior, not a bug
 - `withGlobal` selectors must not allocate new objects/arrays — defeats memoization
 - `openChat` action and `notifyAboutMessage` silently no-op for chats outside the Main folder — if a chat won't open or notify, check `mainFolder.ts` logic before the chat/notification pipeline
+- `logs/` is not gitignored and accumulates `error-N.log`/`out-N.log` pairs on every `serve.cjs` restart (212 pairs as of 2026-07-17) — check contents before `git add -A` (added 2026-07-17)
+- A stray root-level file named after the port (e.g. `8445`) can appear from a launcher's error-redirection — not part of the app, safe to delete (added 2026-07-17)
 
 ## Superseded
 (None yet)
