@@ -17,7 +17,7 @@ None known
 ## Next Actions
 - [ ] Commit or discard the local-only chinvex lookup index (`docs/sys/lookup.json`) and the `CLAUDE.md` pointer edit
 - [ ] Resolve stray untracked `serve.js` — an incomplete duplicate of `serve.cjs` missing the Fetch proxy and dist-copy logic; delete or clarify its purpose
-- [ ] Clean up stray untracked cruft: `logs/` (426 files, growing), root file `8445`, stale worktree `.worktrees/loop-1783831370776-db43f9`
+- [ ] Clean up stray untracked cruft: `logs/` (428 files, growing), root file `8445`, stale worktree `.worktrees/loop-1783831370776-db43f9`
 - [ ] Confirm the SW notification allowlist (`setAllowedNotificationChatIds`) is posted correctly from `ChatFolders.tsx` on folder changes
 - [ ] Re-confirm Fetch extraction end-to-end through cloudflared tunnel post-Vite-migration
 
@@ -32,7 +32,7 @@ None known
 - Expo/React Native WebView wrapper (`app/`, untracked since 2026-04) loading https://interlink.unkndlabs.com
 
 ---
-Last memory update: 2026-07-20
-Commits covered through: 5e07ac565ef4b5d8e6143121a0ab287282a4d337
+Last memory update: 2026-07-21
+Commits covered through: f838ff87c516a3b19c40f10a45514aa06158136d
 
-<!-- chinvex:last-commit:5e07ac565ef4b5d8e6143121a0ab287282a4d337 -->
+<!-- chinvex:last-commit:f838ff87c516a3b19c40f10a45514aa06158136d -->
