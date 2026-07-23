@@ -38,7 +38,7 @@
 - Fetch extraction hook: `src/hooks/useFetchExtract.ts`
 - Main folder helpers: `src/util/mainFolder.ts` (`findMainChatFolder`, `isChatInMainFolder`)
 - Upstream sync workflow: `.github/workflows/sync-upstream.yml`
-- Repo root `CLAUDE.md` is a one-line redirect pointer to `AGENTS.md` (real project instructions live in `AGENTS.md`, upstream renamed it from `CLAUDE.md` in #7012)
+- Repo root `CLAUDE.md` is a git **symlink** (mode 120000) whose target is `AGENTS.md` — real project instructions live in `AGENTS.md` (upstream renamed it from `CLAUDE.md` in #7012) (updated 2026-07-22)
 
 ## Hazards
 - WebView lacks `navigator.locks` — `compatTest.js` is patched to always pass; don't revert this
@@ -51,6 +51,7 @@
 - A stray root-level file named after the port (e.g. `8445`) can appear from a launcher's error-redirection — not part of the app, safe to delete (added 2026-07-17)
 - Untracked `serve.js` (repo root) is an incomplete duplicate of `serve.cjs` — no Fetch proxy, no dist-copy step; `serve.cjs` is the canonical production server, don't confuse the two (added 2026-07-17)
 - `.worktrees/` can accumulate stray dirs from the `loop` skill (e.g. `loop-1783831370776-db43f9`) that outlive their run — check before assuming it's app-related state (added 2026-07-17)
+- Never write prose into `CLAUDE.md` — git tracks it as a symlink (mode 120000), so added text becomes the link target and produces a broken symlink on checkout. Put agent instructions in `AGENTS.md` (added 2026-07-22)
 
 ## Superseded
 (None yet)
