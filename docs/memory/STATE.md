@@ -9,7 +9,7 @@ Maintain a custom fork of Telegram Web A (telegram-t) focused on a single "Main"
 ## Active Work
 - Main-only mode live: chat navigation, folder UI, and notifications (foreground + service worker) restricted to the "Main" Telegram folder, fail-closed if it's missing
 - Weekly automated upstream sync (`sync-upstream.yml`) merges Ajaxy/telegram-tt, validates (check+test+build), and pushes only on success
-- No code commits since 2026-07-14 (bc9f1a6ce/9d63b6e4a); the last five commits are all memory anchor-advances
+- No code commits since 2026-07-14 (bc9f1a6ce/9d63b6e4a); the last six commits are all memory anchor-advances
 
 ## Blockers
 None known
@@ -32,7 +32,7 @@ None known
 - Expo/React Native WebView wrapper (`app/`, untracked since 2026-04) loading https://interlink.unkndlabs.com
 
 ---
-Last memory update: 2026-07-22
-Commits covered through: 28a9ba6f5b94ecfc16d67361777813ac27fbb829
+Last memory update: 2026-07-23
+Commits covered through: 4b4f3f45bd482df94bdaa1b5238903ac7cf08763
 
-<!-- chinvex:last-commit:28a9ba6f5b94ecfc16d67361777813ac27fbb829 -->
+<!-- chinvex:last-commit:4b4f3f45bd482df94bdaa1b5238903ac7cf08763 -->

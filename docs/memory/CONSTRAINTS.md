@@ -39,6 +39,7 @@
 - Main folder helpers: `src/util/mainFolder.ts` (`findMainChatFolder`, `isChatInMainFolder`)
 - Upstream sync workflow: `.github/workflows/sync-upstream.yml`
 - Repo root `CLAUDE.md` is a git **symlink** (mode 120000) whose target is `AGENTS.md` — real project instructions live in `AGENTS.md` (upstream renamed it from `CLAUDE.md` in #7012) (updated 2026-07-22)
+- `AGENTS.md` deliberately has no "Memory System" section — it is a 461-line upstream-tracked file that `sync-upstream.yml` auto-merges weekly, so Interlink-local additions raise conflict risk; `/update-memory` should skip that step here (added 2026-07-23)
 
 ## Hazards
 - WebView lacks `navigator.locks` — `compatTest.js` is patched to always pass; don't revert this
