@@ -9,7 +9,7 @@ Maintain a custom fork of Telegram Web A (telegram-t) focused on a single "Main"
 ## Active Work
 - Main-only mode live: chat navigation, folder UI, and notifications (foreground + service worker) restricted to the "Main" Telegram folder, fail-closed if it's missing
 - Weekly automated upstream sync (`sync-upstream.yml`) merges Ajaxy/telegram-tt, validates (check+test+build), and pushes only on success
-- No code commits since 2026-07-14 (bc9f1a6ce/9d63b6e4a); the last seven commits are all memory anchor-advances
+- No code commits since 2026-07-14 (bc9f1a6ce/9d63b6e4a); the last eight commits are all memory anchor-advances
 
 ## Blockers
 None known
@@ -33,6 +33,6 @@ None known
 
 ---
 Last memory update: 2026-07-24
-Commits covered through: 8a769af5eed9394cfecc1bb3e954b54919046d6f
+Commits covered through: 5ffa0388a205abc1d622d9b75c6ced5c04bae545
 
-<!-- chinvex:last-commit:8a769af5eed9394cfecc1bb3e954b54919046d6f -->
+<!-- chinvex:last-commit:5ffa0388a205abc1d622d9b75c6ced5c04bae545 -->
