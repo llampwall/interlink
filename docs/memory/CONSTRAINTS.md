@@ -53,7 +53,9 @@
 - A stray root-level file named after the port (e.g. `8445`) can appear from a launcher's error-redirection — not part of the app, safe to delete (added 2026-07-17)
 - Untracked `serve.js` (repo root) is an incomplete duplicate of `serve.cjs` — no Fetch proxy, no dist-copy step; `serve.cjs` is the canonical production server, don't confuse the two (added 2026-07-17)
 - `.worktrees/` can accumulate stray dirs from the `loop` skill (e.g. `loop-1783831370776-db43f9`) that outlive their run — check before assuming it's app-related state (added 2026-07-17)
-- Never write prose into `CLAUDE.md` — git tracks it as a symlink (mode 120000), so added text becomes the link target and produces a broken symlink on checkout. It has been corrupted this way at least twice (restored 2026-07-24). `AGENTS.md` is also off-limits for fork-local prose (see Key Facts); put Interlink-only agent guidance in `docs/memory/` instead (updated 2026-07-24)
+- Never write prose into `CLAUDE.md` — git tracks it as a symlink (mode 120000), so added text becomes the link target and produces a broken symlink on checkout. Corrupted three times so far (restored 2026-07-24, 2026-07-25). `AGENTS.md` is also off-limits for fork-local prose (see Key Facts); put Interlink-only agent guidance in `docs/memory/` instead (updated 2026-07-25)
+- The corruption source is `strap map`, not a human — `P:\software\_strap\modules\Commands\map.ps1:423-441` appends the `docs/sys/lookup.json` hint to `CLAUDE.md` whenever the marker is absent, with no symlink check. Every `strap map` / chinvex re-index in this repo re-breaks the symlink; restoring with `git checkout -- CLAUDE.md` is a patch, not a fix (added 2026-07-25)
+- `.chinvex-status.json` is stale (last run 2026-06-05) — do not use it to judge whether the lookup index is current; check `docs/sys/lookup.json` mtime instead (added 2026-07-25)
 
 ## Superseded
 (None yet)

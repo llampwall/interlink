@@ -4,6 +4,7 @@
 # Decisions
 
 ## Recent (last 30 days)
+- Traced the recurring `CLAUDE.md` symlink corruption to `strap map`'s unguarded hint append; restored the symlink, source fix still pending
 - Merged upstream Telegram Web A from v12.0.23 to v12.0.32 (Vite migration, Vitest migration, Settings/Profile/Left Panel redesigns)
 - Restored custom integrations (Fetch extraction, `serve.cjs`) after the upstream merge
 - Added main-folder-only mode: chat nav, folder UI, and notifications restricted to the "Main" Telegram folder, fail-closed
@@ -12,6 +13,14 @@
 - Added `serve.cjs` production server to replace bash deploy script (Windows-incompatible)
 
 ## 2026-07
+
+### 2026-07-25 — Diagnosed recurring `CLAUDE.md` symlink corruption
+
+- **Symptom:** `CLAUDE.md` repeatedly shows as modified with the `docs/sys/lookup.json` hint appended after its `AGENTS.md` target line. Git tracks the file as mode 120000, so the whole blob is the link target — the result is a broken symlink on checkout. Third occurrence; a restore was committed the previous day (7d4a0c5f5) and it re-broke three seconds later.
+- **Root cause:** `strap map` writes the lookup index, then appends the hint to `CLAUDE.md` if the marker string is absent (`P:\software\_strap\modules\Commands\map.ps1:423-441`). It tests only `Test-Path` and never checks whether the file is a symlink. Confirmed by identical mtimes on `CLAUDE.md` and `docs/sys/lookup.json` (2026-07-24 23:16:13) and by the appended text matching the literal in `map.ps1` exactly.
+- **Fix:** Restored the symlink with `git checkout -- CLAUDE.md`. The generator is unchanged, so this recurs on every `strap map` run in this repo.
+- **Prevention:** Needs a symlink guard in `strap map` (skip or follow the link and append to the target). Until that lands, treat a dirty `CLAUDE.md` here as machine-generated corruption, not a human edit, and restore rather than reconcile.
+- **Evidence:** `P:\software\_strap\modules\Commands\map.ps1:423-441`; mtime match on `CLAUDE.md` / `docs/sys/lookup.json`; prior restores 7d4a0c5f5 and 4b4f3f45b
 
 ### 2026-07-14 — Merge upstream Telegram Web A v12.0.23 → v12.0.32
 
