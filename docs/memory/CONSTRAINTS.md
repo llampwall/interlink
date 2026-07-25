@@ -40,6 +40,7 @@
 - Upstream sync workflow: `.github/workflows/sync-upstream.yml`
 - Repo root `CLAUDE.md` is a git **symlink** (mode 120000) whose target is `AGENTS.md` — real project instructions live in `AGENTS.md` (upstream renamed it from `CLAUDE.md` in #7012) (updated 2026-07-22)
 - `AGENTS.md` deliberately has no "Memory System" section — it is a 461-line upstream-tracked file that `sync-upstream.yml` auto-merges weekly, so Interlink-local additions raise conflict risk; `/update-memory` should skip that step here (added 2026-07-23)
+- Concept-to-files index at `docs/sys/lookup.json` (chinvex-generated, untracked) — check it before Glob/Grep (added 2026-07-24)
 
 ## Hazards
 - WebView lacks `navigator.locks` — `compatTest.js` is patched to always pass; don't revert this
@@ -52,7 +53,7 @@
 - A stray root-level file named after the port (e.g. `8445`) can appear from a launcher's error-redirection — not part of the app, safe to delete (added 2026-07-17)
 - Untracked `serve.js` (repo root) is an incomplete duplicate of `serve.cjs` — no Fetch proxy, no dist-copy step; `serve.cjs` is the canonical production server, don't confuse the two (added 2026-07-17)
 - `.worktrees/` can accumulate stray dirs from the `loop` skill (e.g. `loop-1783831370776-db43f9`) that outlive their run — check before assuming it's app-related state (added 2026-07-17)
-- Never write prose into `CLAUDE.md` — git tracks it as a symlink (mode 120000), so added text becomes the link target and produces a broken symlink on checkout. Put agent instructions in `AGENTS.md` (added 2026-07-22)
+- Never write prose into `CLAUDE.md` — git tracks it as a symlink (mode 120000), so added text becomes the link target and produces a broken symlink on checkout. It has been corrupted this way at least twice (restored 2026-07-24). `AGENTS.md` is also off-limits for fork-local prose (see Key Facts); put Interlink-only agent guidance in `docs/memory/` instead (updated 2026-07-24)
 
 ## Superseded
 (None yet)
