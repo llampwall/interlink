@@ -20,6 +20,7 @@
 - **Symptom:** `CLAUDE.md` was dirty again at the start of this run, one day after the previous run restored it. Fourth occurrence.
 - **Root cause:** The restore is undone by the act of recording it. Commit 3646b9f22 landed at 09:17:12; `CLAUDE.md` and `docs/sys/lookup.json` were both rewritten at 09:17:15 by the chinvex/`strap map` re-index the commit triggered. Identical mtimes on both files place them in the same `map.ps1` run. The generator defect is unchanged (`map.ps1:423-441`, no symlink guard).
 - **Fix:** None applied. Restoring costs a turn and buys three seconds, so this run leaves the working tree dirty and records the loop instead.
+- **Corollary:** The corruption is idempotent once present. `map.ps1` appends only when the marker string is absent, so a corrupted `CLAUDE.md` is left alone by later runs — verified after commit 35628c00d, which did not change the file's 09:17:15 mtime. The rewrite only re-fires after someone restores the symlink, which is why the damage looks periodic rather than constant.
 - **Prevention:** Add a symlink guard to `strap map` (skip the append, or resolve the link and append to `AGENTS.md`'s replacement target). Until then, a dirty `CLAUDE.md` in this repo is expected machine output after every commit — do not treat it as a human edit and do not spend a turn reverting it.
 - **Evidence:** commit 3646b9f22 (09:17:12 -07:00) vs. mtime 09:17:15 on both `CLAUDE.md` and `docs/sys/lookup.json`; `P:\software\_strap\modules\Commands\map.ps1:423-441`
 
