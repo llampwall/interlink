@@ -4,6 +4,7 @@
 # Decisions
 
 ## Recent (last 30 days)
+- Confirmed the `CLAUDE.md` corruption is a closed loop — the memory commit itself triggers the re-index that re-breaks the symlink; stopped restoring it per-run and left the source fix as the only real remedy
 - Traced the recurring `CLAUDE.md` symlink corruption to `strap map`'s unguarded hint append; restored the symlink, source fix still pending
 - Merged upstream Telegram Web A from v12.0.23 to v12.0.32 (Vite migration, Vitest migration, Settings/Profile/Left Panel redesigns)
 - Restored custom integrations (Fetch extraction, `serve.cjs`) after the upstream merge
@@ -13,6 +14,14 @@
 - Added `serve.cjs` production server to replace bash deploy script (Windows-incompatible)
 
 ## 2026-07
+
+### 2026-07-25 — Stop restoring `CLAUDE.md` during `/update-memory`; corruption is a closed loop
+
+- **Symptom:** `CLAUDE.md` was dirty again at the start of this run, one day after the previous run restored it. Fourth occurrence.
+- **Root cause:** The restore is undone by the act of recording it. Commit 3646b9f22 landed at 09:17:12; `CLAUDE.md` and `docs/sys/lookup.json` were both rewritten at 09:17:15 by the chinvex/`strap map` re-index the commit triggered. Identical mtimes on both files place them in the same `map.ps1` run. The generator defect is unchanged (`map.ps1:423-441`, no symlink guard).
+- **Fix:** None applied. Restoring costs a turn and buys three seconds, so this run leaves the working tree dirty and records the loop instead.
+- **Prevention:** Add a symlink guard to `strap map` (skip the append, or resolve the link and append to `AGENTS.md`'s replacement target). Until then, a dirty `CLAUDE.md` in this repo is expected machine output after every commit — do not treat it as a human edit and do not spend a turn reverting it.
+- **Evidence:** commit 3646b9f22 (09:17:12 -07:00) vs. mtime 09:17:15 on both `CLAUDE.md` and `docs/sys/lookup.json`; `P:\software\_strap\modules\Commands\map.ps1:423-441`
 
 ### 2026-07-25 — Diagnosed recurring `CLAUDE.md` symlink corruption
 

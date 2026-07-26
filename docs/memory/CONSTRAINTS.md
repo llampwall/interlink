@@ -40,7 +40,7 @@
 - Upstream sync workflow: `.github/workflows/sync-upstream.yml`
 - Repo root `CLAUDE.md` is a git **symlink** (mode 120000) whose target is `AGENTS.md` — real project instructions live in `AGENTS.md` (upstream renamed it from `CLAUDE.md` in #7012) (updated 2026-07-22)
 - `AGENTS.md` deliberately has no "Memory System" section — it is a 461-line upstream-tracked file that `sync-upstream.yml` auto-merges weekly, so Interlink-local additions raise conflict risk; `/update-memory` should skip that step here (added 2026-07-23)
-- Concept-to-files index at `docs/sys/lookup.json` (chinvex-generated, untracked) — check it before Glob/Grep (added 2026-07-24)
+- Concept-to-files index at `docs/sys/lookup.json` (chinvex-generated, untracked, ~98 KB) — check it before Glob/Grep; confirmed present and regenerated 2026-07-25 (updated 2026-07-25)
 
 ## Hazards
 - WebView lacks `navigator.locks` — `compatTest.js` is patched to always pass; don't revert this
@@ -49,12 +49,13 @@
 - `postinstall` clears `.cache/` on every `npm install` — expected behavior, not a bug
 - `withGlobal` selectors must not allocate new objects/arrays — defeats memoization
 - `openChat` action and `notifyAboutMessage` silently no-op for chats outside the Main folder — if a chat won't open or notify, check `mainFolder.ts` logic before the chat/notification pipeline
-- `logs/` is not gitignored and accumulates `error-N.log`/`out-N.log` pairs on every `serve.cjs` restart (428 files as of 2026-07-21, up from 212 — check contents before `git add -A`) (updated 2026-07-21)
+- `logs/` is not gitignored and accumulates `error-N.log`/`out-N.log` pairs on every `serve.cjs` restart (436 files as of 2026-07-25, up from 428 on 2026-07-21 and 212 before that — check contents before `git add -A`) (updated 2026-07-25)
 - A stray root-level file named after the port (e.g. `8445`) can appear from a launcher's error-redirection — not part of the app, safe to delete (added 2026-07-17)
 - Untracked `serve.js` (repo root) is an incomplete duplicate of `serve.cjs` — no Fetch proxy, no dist-copy step; `serve.cjs` is the canonical production server, don't confuse the two (added 2026-07-17)
 - `.worktrees/` can accumulate stray dirs from the `loop` skill (e.g. `loop-1783831370776-db43f9`) that outlive their run — check before assuming it's app-related state (added 2026-07-17)
-- Never write prose into `CLAUDE.md` — git tracks it as a symlink (mode 120000), so added text becomes the link target and produces a broken symlink on checkout. Corrupted three times so far (restored 2026-07-24, 2026-07-25). `AGENTS.md` is also off-limits for fork-local prose (see Key Facts); put Interlink-only agent guidance in `docs/memory/` instead (updated 2026-07-25)
+- Never write prose into `CLAUDE.md` — git tracks it as a symlink (mode 120000), so added text becomes the link target and produces a broken symlink on checkout. Corrupted four times so far (restored 2026-07-24, 2026-07-25 ×2). `AGENTS.md` is also off-limits for fork-local prose (see Key Facts); put Interlink-only agent guidance in `docs/memory/` instead (updated 2026-07-25)
 - The corruption source is `strap map`, not a human — `P:\software\_strap\modules\Commands\map.ps1:423-441` appends the `docs/sys/lookup.json` hint to `CLAUDE.md` whenever the marker is absent, with no symlink check. Every `strap map` / chinvex re-index in this repo re-breaks the symlink; restoring with `git checkout -- CLAUDE.md` is a patch, not a fix (added 2026-07-25)
+- The corruption is a self-perpetuating loop, so restoring `CLAUDE.md` during `/update-memory` cannot stick: the memory commit itself triggers a chinvex/`strap map` re-index that re-corrupts the file seconds later. Confirmed 2026-07-25 — commit 3646b9f22 at 09:17:12, then `CLAUDE.md` and `docs/sys/lookup.json` both rewritten at 09:17:15. Expect a dirty `CLAUDE.md` after every memory commit until `map.ps1` gets a symlink guard (added 2026-07-25)
 - `.chinvex-status.json` is stale (last run 2026-06-05) — do not use it to judge whether the lookup index is current; check `docs/sys/lookup.json` mtime instead (added 2026-07-25)
 
 ## Superseded
