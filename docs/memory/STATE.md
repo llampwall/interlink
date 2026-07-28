@@ -9,15 +9,15 @@ Maintain a custom fork of Telegram Web A (telegram-t) focused on a single "Main"
 ## Active Work
 - Main-only mode live: chat navigation, folder UI, and notifications (foreground + service worker) restricted to the "Main" Telegram folder, fail-closed if it's missing
 - Weekly automated upstream sync (`sync-upstream.yml`) merges Ajaxy/telegram-tt, validates (check+test+build), and pushes only on success
-- No code commits since 2026-07-14 (bc9f1a6ce/9d63b6e4a); every commit since is a memory anchor-advance (fifteen and counting)
+- No code commits since 2026-07-14 (bc9f1a6ce/9d63b6e4a); every commit since is a memory anchor-advance (sixteen and counting)
 
 ## Blockers
 None known
 
 ## Next Actions
 - [ ] Fix the `CLAUDE.md` symlink corruption at the source — `strap map` appends the lookup hint with no symlink guard (`P:\software\_strap\modules\Commands\map.ps1:423`). It is a closed loop: committing memory triggers the re-index that re-breaks the link, so restoring here can never stick
-- [ ] Commit or gitignore the untracked chinvex index (`docs/sys/lookup.json`, current as of 2026-07-26) — `AGENTS.md` tells agents to read it; it is regenerated on every commit
-- [ ] Clean up stray untracked cruft: `logs/` (454 files, +18 since 2026-07-26), root file `8445`, `serve.js` duplicate, `.worktrees/loop-1783831370776-db43f9`
+- [ ] Commit or gitignore the untracked chinvex index (`docs/sys/lookup.json`, current as of 2026-07-27) — `AGENTS.md` tells agents to read it; it is regenerated on every commit
+- [ ] Clean up stray untracked cruft: `logs/` (458 files, +4 since 2026-07-27), root file `8445`, `serve.js` duplicate, `.worktrees/loop-1783831370776-db43f9`
 - [ ] Confirm the SW notification allowlist (`setAllowedNotificationChatIds`) is posted correctly from `ChatFolders.tsx` on folder changes
 - [ ] Re-confirm Fetch extraction end-to-end through cloudflared tunnel post-Vite-migration
 
@@ -32,7 +32,7 @@ None known
 - Expo/React Native WebView wrapper (`app/`, untracked since 2026-04) loading https://interlink.unkndlabs.com
 
 ---
-Last memory update: 2026-07-27
-Commits covered through: 54290b8a9f2379856b451c13e6662588ec12152f
+Last memory update: 2026-07-28
+Commits covered through: ef40f9f4d1f9300ee11d9c0505cfd5ded284f5f7
 
-<!-- chinvex:last-commit:54290b8a9f2379856b451c13e6662588ec12152f -->
+<!-- chinvex:last-commit:ef40f9f4d1f9300ee11d9c0505cfd5ded284f5f7 -->
