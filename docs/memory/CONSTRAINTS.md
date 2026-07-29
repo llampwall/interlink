@@ -40,7 +40,7 @@
 - Upstream sync workflow: `.github/workflows/sync-upstream.yml`
 - Repo root `CLAUDE.md` is a git **symlink** (mode 120000) whose target is `AGENTS.md` — real project instructions live in `AGENTS.md` (upstream renamed it from `CLAUDE.md` in #7012) (updated 2026-07-22)
 - `AGENTS.md` deliberately has no "Memory System" section — it is a 461-line upstream-tracked file that `sync-upstream.yml` auto-merges weekly, so Interlink-local additions raise conflict risk; `/update-memory` should skip that step here (added 2026-07-23)
-- Concept-to-files index at `docs/sys/lookup.json` (chinvex-generated, untracked, ~98 KB) — check it before Glob/Grep; confirmed present, last regenerated 2026-07-28 09:20 by the commit-triggered re-index (updated 2026-07-28)
+- Concept-to-files index at `docs/sys/lookup.json` (chinvex-generated, untracked, ~98 KB) — check it before Glob/Grep; confirmed present, last regenerated 2026-07-28 23:20 by the commit-triggered re-index (updated 2026-07-29)
 
 ## Hazards
 - WebView lacks `navigator.locks` — `compatTest.js` is patched to always pass; don't revert this
@@ -49,7 +49,7 @@
 - `postinstall` clears `.cache/` on every `npm install` — expected behavior, not a bug
 - `withGlobal` selectors must not allocate new objects/arrays — defeats memoization
 - `openChat` action and `notifyAboutMessage` silently no-op for chats outside the Main folder — if a chat won't open or notify, check `mainFolder.ts` logic before the chat/notification pipeline
-- `logs/` is not gitignored and accumulates `error-N.log`/`out-N.log` pairs on every `serve.cjs` restart (460 files as of 2026-07-28 evening, up from 458 that morning, 454 on 2026-07-27, 436 on 2026-07-26, 428 on 2026-07-21 and 212 before that — the server is cycled most days, sometimes twice; check contents before `git add -A`) (updated 2026-07-28)
+- `logs/` is not gitignored and accumulates `error-N.log`/`out-N.log` pairs on every `serve.cjs` restart (still 460 files on 2026-07-29 morning, unchanged from 2026-07-28 evening — no overnight restart; 458 on 2026-07-28 morning, 454 on 2026-07-27, 436 on 2026-07-26, 428 on 2026-07-21 and 212 before that — the server is cycled most days, sometimes twice; check contents before `git add -A`) (updated 2026-07-29)
 - A stray root-level file named after the port (e.g. `8445`) can appear from a launcher's error-redirection — not part of the app, safe to delete (added 2026-07-17)
 - Untracked `serve.js` (repo root) is an incomplete duplicate of `serve.cjs` — no Fetch proxy, no dist-copy step; `serve.cjs` is the canonical production server, don't confuse the two (added 2026-07-17)
 - `.worktrees/` can accumulate stray dirs from the `loop` skill (e.g. `loop-1783831370776-db43f9`) that outlive their run — check before assuming it's app-related state (added 2026-07-17)
