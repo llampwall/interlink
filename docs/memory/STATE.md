@@ -9,14 +9,14 @@ Maintain a custom fork of Telegram Web A (telegram-t) focused on a single "Main"
 ## Active Work
 - Main-only mode live: chat navigation, folder UI, and notifications (foreground + service worker) restricted to the "Main" Telegram folder, fail-closed if it's missing
 - Weekly automated upstream sync (`sync-upstream.yml`) merges Ajaxy/telegram-tt, validates (check+test+build), and pushes only on success
-- No code commits since 2026-07-14 (bc9f1a6ce/9d63b6e4a); every commit since is a memory anchor-advance (twenty-one). Cadence is irregular — one on 2026-07-29 09:18, then two on 2026-08-01 (09:26 and 23:23)
+- No source commits since 2026-07-14 (bc9f1a6ce/9d63b6e4a, then the ca107f210 dist refresh); the twenty-eight commits since are all memory anchor-advances. Cadence is irregular — 2026-07-29 09:18, then two on 2026-08-01 (09:26, 23:23), then 2026-08-02 09:18
 
 ## Blockers
 None known
 
 ## Next Actions
 - [ ] Fix the `CLAUDE.md` symlink corruption at the source — `strap map` appends the lookup hint with no symlink guard (`P:\software\_strap\modules\Commands\map.ps1:423`). It is a closed loop: committing memory triggers the re-index that re-breaks the link, so restoring here can never stick
-- [ ] Commit or gitignore the untracked chinvex index (`docs/sys/lookup.json`, current as of 2026-08-01 23:23) — `AGENTS.md` tells agents to read it; it is regenerated on every commit
+- [ ] Commit or gitignore the untracked chinvex index (`docs/sys/lookup.json`, current as of 2026-08-02 09:18) — `AGENTS.md` tells agents to read it; it is regenerated on every commit
 - [ ] Clean up stray untracked cruft: `logs/` (462 files, unchanged since the 2026-08-01 restart), root file `8445`, `serve.js` duplicate, `.worktrees/loop-1783831370776-db43f9`
 - [ ] Confirm the SW notification allowlist (`setAllowedNotificationChatIds`) is posted correctly from `ChatFolders.tsx` on folder changes
 - [ ] Re-confirm Fetch extraction end-to-end through cloudflared tunnel post-Vite-migration
@@ -33,6 +33,6 @@ None known
 
 ---
 Last memory update: 2026-08-02
-Commits covered through: 8723730db0a5d8804b91079c3afd680c9078dcc9
+Commits covered through: fa0060924584da7e58acd90effc79d5e3a788583
 
-<!-- chinvex:last-commit:8723730db0a5d8804b91079c3afd680c9078dcc9 -->
+<!-- chinvex:last-commit:fa0060924584da7e58acd90effc79d5e3a788583 -->
