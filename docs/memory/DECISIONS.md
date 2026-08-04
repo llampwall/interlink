@@ -10,8 +10,6 @@
 - Restored custom integrations (Fetch extraction, `serve.cjs`) after the upstream merge
 - Added main-folder-only mode: chat nav, folder UI, and notifications restricted to the "Main" Telegram folder, fail-closed
 - Added weekly automated upstream sync CI (`sync-upstream.yml`) that validates before pushing
-- Added Fetch media extraction: social URLs auto-converted to native Telegram photos/videos on send
-- Added `serve.cjs` production server to replace bash deploy script (Windows-incompatible)
 
 ## 2026-07
 

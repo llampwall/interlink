@@ -40,7 +40,7 @@
 - Upstream sync workflow: `.github/workflows/sync-upstream.yml`
 - Repo root `CLAUDE.md` is a git **symlink** (mode 120000) whose target is `AGENTS.md` — real project instructions live in `AGENTS.md` (upstream renamed it from `CLAUDE.md` in #7012) (updated 2026-07-22)
 - `AGENTS.md` deliberately has no "Memory System" section — it is a 461-line upstream-tracked file that `sync-upstream.yml` auto-merges weekly, so Interlink-local additions raise conflict risk; `/update-memory` should skip that step here (added 2026-07-23)
-- Concept-to-files index at `docs/sys/lookup.json` (chinvex-generated, untracked, ~98 KB) — check it before Glob/Grep; confirmed present, last regenerated 2026-08-02 23:16:57 (three seconds after commit e9c7180d8) by the commit-triggered re-index (updated 2026-08-03)
+- Concept-to-files index at `docs/sys/lookup.json` (chinvex-generated, untracked, ~98 KB) — check it before Glob/Grep; confirmed present, last regenerated 2026-08-03 09:26:39 (three seconds after commit c0d83cfac) by the commit-triggered re-index (updated 2026-08-03)
 
 ## Hazards
 - WebView lacks `navigator.locks` — `compatTest.js` is patched to always pass; don't revert this
