@@ -49,7 +49,7 @@
 - `postinstall` clears `.cache/` on every `npm install` — expected behavior, not a bug
 - `withGlobal` selectors must not allocate new objects/arrays — defeats memoization
 - `openChat` action and `notifyAboutMessage` silently no-op for chats outside the Main folder — if a chat won't open or notify, check `mainFolder.ts` logic before the chat/notification pipeline
-- `logs/` is not gitignored and accumulates `error-N.log`/`out-N.log` pairs on every `serve.cjs` restart (still 462 files on 2026-08-03 — no restart since 2026-08-01 12:16, which ended a four-day quiet stretch; growth is bursty, not daily; 460 earlier on 2026-08-01, 458 on 2026-07-28 morning, 454 on 2026-07-27, 436 on 2026-07-26, 428 on 2026-07-21 and 212 before that; check contents before `git add -A`) (updated 2026-08-03)
+- `logs/` is not gitignored and accumulates `error-N.log`/`out-N.log` pairs on every `serve.cjs` restart (still 462 files on 2026-08-04 — no restart since 2026-08-01 12:16, now a three-day quiet stretch; growth is bursty, not daily; 460 earlier on 2026-08-01, 458 on 2026-07-28 morning, 454 on 2026-07-27, 436 on 2026-07-26, 428 on 2026-07-21 and 212 before that; check contents before `git add -A`) (updated 2026-08-04)
 - A stray root-level file named after the port (e.g. `8445`) can appear from a launcher's error-redirection — not part of the app, safe to delete (added 2026-07-17)
 - Untracked `serve.js` (repo root) is an incomplete duplicate of `serve.cjs` — no Fetch proxy, no dist-copy step; `serve.cjs` is the canonical production server, don't confuse the two (added 2026-07-17)
 - `.worktrees/` can accumulate stray dirs from the `loop` skill (e.g. `loop-1783831370776-db43f9`) that outlive their run — check before assuming it's app-related state (added 2026-07-17)
