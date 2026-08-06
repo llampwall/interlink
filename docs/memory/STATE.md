@@ -9,15 +9,15 @@ Maintain a custom fork of Telegram Web A (telegram-t) focused on a single "Main"
 ## Active Work
 - Main-only mode live: chat navigation, folder UI, and notifications (foreground + service worker) restricted to the "Main" Telegram folder, fail-closed if it's missing
 - Weekly automated upstream sync (`sync-upstream.yml`) merges Ajaxy/telegram-tt, validates (check+test+build), and pushes only on success
-- No source commits since 2026-07-14 (bc9f1a6ce/9d63b6e4a, then the ca107f210 dist refresh); the thirty-four commits since are all memory anchor-advances. Twice-daily cadence holding: 2026-08-05 (09:18, 23:17)
-- Runtime quiet since the 2026-08-05 08:02 `serve.cjs` restart — no new restart during the day (`logs/` still 464 files, newest pair `error-51`/`out-51`)
+- No source commits since 2026-07-14 (bc9f1a6ce/9d63b6e4a, then the ca107f210 dist refresh); the thirty-five commits since are all memory anchor-advances. Cadence: 2026-08-05 (09:18, 23:18), then this 2026-08-06 run
+- Runtime quiet for ~32 hours — no `serve.cjs` restart since 2026-08-05 08:02 (`logs/` still 464 files, newest pair `error-51`/`out-51`)
 
 ## Blockers
 None known
 
 ## Next Actions
 - [ ] Fix the `CLAUDE.md` symlink corruption at the source — `strap map` appends the lookup hint with no symlink guard (`P:\software\_strap\modules\Commands\map.ps1:423`). It is a closed loop: committing memory triggers the re-index that re-breaks the link, so restoring here can never stick
-- [ ] Commit or gitignore the untracked chinvex index (`docs/sys/lookup.json`, current as of 2026-08-05 09:18) — `AGENTS.md` tells agents to read it; it is regenerated on every commit
+- [ ] Commit or gitignore the untracked chinvex index (`docs/sys/lookup.json`, current as of 2026-08-05 23:18) — `AGENTS.md` tells agents to read it; it is regenerated on every commit
 - [ ] Clean up stray untracked cruft: `logs/` (464 files), root file `8445`, `serve.js` duplicate, `.worktrees/loop-1783831370776-db43f9`
 - [ ] Confirm the SW notification allowlist (`setAllowedNotificationChatIds`) is posted correctly from `ChatFolders.tsx` on folder changes
 - [ ] Re-confirm Fetch extraction end-to-end through cloudflared tunnel post-Vite-migration
@@ -33,7 +33,7 @@ None known
 - Expo/React Native WebView wrapper (`app/`, untracked since 2026-04) loading https://interlink.unkndlabs.com
 
 ---
-Last memory update: 2026-08-05
-Commits covered through: 564afaf80513ab1a745b524ad73f47cce06a1c00
+Last memory update: 2026-08-06
+Commits covered through: a5f2e44f103d87ec4a7089dda447404386aaa8a4
 
-<!-- chinvex:last-commit:564afaf80513ab1a745b524ad73f47cce06a1c00 -->
+<!-- chinvex:last-commit:a5f2e44f103d87ec4a7089dda447404386aaa8a4 -->
