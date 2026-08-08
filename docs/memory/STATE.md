@@ -9,7 +9,7 @@ Maintain a custom fork of Telegram Web A (telegram-t) focused on a single "Main"
 ## Active Work
 - Main-only mode live: chat navigation, folder UI, and notifications (foreground + service worker) restricted to the "Main" Telegram folder, fail-closed if it's missing
 - Weekly automated upstream sync (`sync-upstream.yml`) merges Ajaxy/telegram-tt, validates (check+test+build), and pushes only on success
-- No source commits since 2026-07-14 (bc9f1a6ce/9d63b6e4a, then the ca107f210 dist refresh); the thirty-six commits since are all memory anchor-advances. Cadence: 2026-08-05 (09:18, 23:18), 2026-08-06 (09:22), then this 2026-08-07 run
+- No source commits since 2026-07-14 (bc9f1a6ce/9d63b6e4a, then the ca107f210 dist refresh); the thirty-seven commits since are all memory anchor-advances. Cadence: 2026-08-05 (09:18, 23:18), 2026-08-06 (09:22), 2026-08-07 (23:20), then this 2026-08-08 run
 - `serve.cjs` restarted 2026-08-06 ~18:25 — `logs/` now 468 files, newest pair `error-144`/`out-144`
 
 ## Blockers
@@ -17,7 +17,7 @@ None known
 
 ## Next Actions
 - [ ] Fix the `CLAUDE.md` symlink corruption at the source — `strap map` appends the lookup hint with no symlink guard (`P:\software\_strap\modules\Commands\map.ps1:423`). It is a closed loop: committing memory triggers the re-index that re-breaks the link, so restoring here can never stick
-- [ ] Commit or gitignore the untracked chinvex index (`docs/sys/lookup.json`, current as of 2026-08-05 23:18) — `AGENTS.md` tells agents to read it; it is regenerated on every commit
+- [ ] Commit or gitignore the untracked chinvex index (`docs/sys/lookup.json`, current as of 2026-08-07 23:20) — `AGENTS.md` tells agents to read it; it is regenerated on every commit
 - [ ] Clean up stray untracked cruft: `logs/` (468 files), root file `8445`, `serve.js` duplicate, `.worktrees/loop-1783831370776-db43f9`
 - [ ] Confirm the SW notification allowlist (`setAllowedNotificationChatIds`) is posted correctly from `ChatFolders.tsx` on folder changes
 - [ ] Re-confirm Fetch extraction end-to-end through cloudflared tunnel post-Vite-migration
@@ -33,7 +33,7 @@ None known
 - Expo/React Native WebView wrapper (`app/`, untracked since 2026-04) loading https://interlink.unkndlabs.com
 
 ---
-Last memory update: 2026-08-07
-Commits covered through: 5b86b9eb8645d5581ebc0afc0104ab164b5efce4
+Last memory update: 2026-08-08
+Commits covered through: 3a92f56f988366e10ec5b61881f4a598abd53d6a
 
-<!-- chinvex:last-commit:5b86b9eb8645d5581ebc0afc0104ab164b5efce4 -->
+<!-- chinvex:last-commit:3a92f56f988366e10ec5b61881f4a598abd53d6a -->
