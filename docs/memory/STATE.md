@@ -9,7 +9,7 @@ Maintain a custom fork of Telegram Web A (telegram-t) focused on a single "Main"
 ## Active Work
 - Main-only mode live: chat navigation, folder UI, and notifications (foreground + service worker) restricted to the "Main" Telegram folder, fail-closed if it's missing
 - Weekly automated upstream sync (`sync-upstream.yml`) merges Ajaxy/telegram-tt, validates (check+test+build), and pushes only on success
-- No source commits since 2026-07-14 (bc9f1a6ce/9d63b6e4a, then the ca107f210 dist refresh); the forty-seven commits since are all memory anchor-advances. Cadence: 2026-08-12 (23:12), 2026-08-13 (09:11), 2026-08-13 (23:11), then this 2026-08-14 16:10 run
+- No source commits since 2026-07-14 (bc9f1a6ce/9d63b6e4a, then the ca107f210 dist refresh); the forty-eight commits since are all memory anchor-advances. Cadence: 2026-08-13 (09:11), 2026-08-13 (23:11), 2026-08-14 (09:11), then this 2026-08-14 23:14 run
 - `serve.cjs` has not restarted since 2026-08-10 19:10 - `logs/` steady at 496 files, newest pair still `error-67`/`out-67`
 
 ## Blockers
@@ -17,7 +17,7 @@ None known
 
 ## Next Actions
 - [ ] Fix the `CLAUDE.md` symlink corruption at the source - `strap map` appends the lookup hint with no symlink guard (`P:\software\_strap\modules\Commands\map.ps1:423`). It is a closed loop: committing memory triggers the re-index that re-breaks the link, so restoring here can never stick
-- [ ] Commit or gitignore the untracked chinvex index (`docs/sys/lookup.json`, current as of 2026-08-13 23:11) - `AGENTS.md` tells agents to read it; it is regenerated on every commit
+- [ ] Commit or gitignore the untracked chinvex index (`docs/sys/lookup.json`, current as of 2026-08-14 09:11) - `AGENTS.md` tells agents to read it; it is regenerated on every commit
 - [ ] Clean up stray untracked cruft: `logs/` (496 files), root file `8445`, `serve.js` duplicate, `.worktrees/loop-1783831370776-db43f9`
 - [ ] Confirm the SW notification allowlist (`setAllowedNotificationChatIds`) is posted correctly from `ChatFolders.tsx` on folder changes
 - [ ] Re-confirm Fetch extraction end-to-end through cloudflared tunnel post-Vite-migration
@@ -34,6 +34,6 @@ None known
 
 ---
 Last memory update: 2026-08-14
-Commits covered through: 1c430355f128c27f46910a667a01adf2ec951791
+Commits covered through: 51d1947986682fbcdd6dca55c6899f467803e15b
 
-<!-- chinvex:last-commit:1c430355f128c27f46910a667a01adf2ec951791 -->
+<!-- chinvex:last-commit:51d1947986682fbcdd6dca55c6899f467803e15b -->
