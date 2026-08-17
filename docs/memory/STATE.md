@@ -9,16 +9,16 @@ Maintain a custom fork of Telegram Web A (telegram-t) focused on a single "Main"
 ## Active Work
 - Main-only mode live: chat navigation, folder UI, and notifications (foreground + service worker) restricted to the "Main" Telegram folder, fail-closed if it's missing
 - Weekly automated upstream sync (`sync-upstream.yml`) merges Ajaxy/telegram-tt, validates (check+test+build), and pushes only on success
-- No source commits since 2026-07-14 (bc9f1a6ce/9d63b6e4a, then the ca107f210 dist refresh); the fifty-one commits since are all memory anchor-advances. Cadence: 2026-08-14 (23:14), 2026-08-15 (09:13), 2026-08-15 (23:13), then this 2026-08-16 run
-- `serve.cjs` has not restarted since 2026-08-10 19:10 - `logs/` steady at 496 files, newest pair still `error-67`/`out-67`
+- No source commits since 2026-07-14 (bc9f1a6ce/9d63b6e4a, then the ca107f210 dist refresh); the fifty-two commits since are all memory anchor-advances. Cadence: 2026-08-15 (09:13), 2026-08-15 (23:13), 2026-08-16 (09:13), then this run
+- `serve.cjs` restarted 2026-08-16 19:04 (first since 2026-08-10) - `logs/` now 498 files, newest pair `error-167`/`out-167`
 
 ## Blockers
 None known
 
 ## Next Actions
 - [ ] Fix the `CLAUDE.md` symlink corruption at the source - `strap map` appends the lookup hint with no symlink guard (`P:\software\_strap\modules\Commands\map.ps1:423`). It is a closed loop: committing memory triggers the re-index that re-breaks the link, so restoring here can never stick
-- [ ] Commit or gitignore the untracked chinvex index (`docs/sys/lookup.json`, current as of 2026-08-15 23:13) - `AGENTS.md` tells agents to read it; it is regenerated on every commit
-- [ ] Clean up stray untracked cruft: `logs/` (496 files), root file `8445`, `serve.js` duplicate, `.worktrees/loop-1783831370776-db43f9`
+- [ ] Commit or gitignore the untracked chinvex index (`docs/sys/lookup.json`, current as of 2026-08-16 09:13) - `AGENTS.md` tells agents to read it; it is regenerated on every commit
+- [ ] Clean up stray untracked cruft: `logs/` (498 files), root file `8445`, `serve.js` duplicate, `.worktrees/loop-1783831370776-db43f9`
 - [ ] Confirm the SW notification allowlist (`setAllowedNotificationChatIds`) is posted correctly from `ChatFolders.tsx` on folder changes
 - [ ] Re-confirm Fetch extraction end-to-end through cloudflared tunnel post-Vite-migration
 
@@ -34,6 +34,6 @@ None known
 
 ---
 Last memory update: 2026-08-16
-Commits covered through: 60832dd266c643db0419881e217806f3d2e2cc70
+Commits covered through: fac1e52a0d190abae986de5dfbcc75f725f0b48c
 
-<!-- chinvex:last-commit:60832dd266c643db0419881e217806f3d2e2cc70 -->
+<!-- chinvex:last-commit:fac1e52a0d190abae986de5dfbcc75f725f0b48c -->
