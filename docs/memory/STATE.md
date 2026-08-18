@@ -9,8 +9,8 @@ Maintain a custom fork of Telegram Web A (telegram-t) focused on a single "Main"
 ## Active Work
 - Main-only mode live: chat navigation, folder UI, and notifications (foreground + service worker) restricted to the "Main" Telegram folder, fail-closed if it's missing
 - Weekly automated upstream sync (`sync-upstream.yml`) merges Ajaxy/telegram-tt, validates (check+test+build), and pushes only on success
-- No source commits since 2026-07-14 (bc9f1a6ce/9d63b6e4a, then the ca107f210 dist refresh); the fifty-four commits since are all memory anchor-advances. Cadence: 2026-08-16 (09:13), 2026-08-16 (23:13), 2026-08-17 (09:13), then this run
-- `serve.cjs` restarted four more times on 2026-08-17 (through 19:54) - `logs/` now 512 files, newest pair `error-347`/`out-347`
+- No source commits since 2026-07-14 (bc9f1a6ce/9d63b6e4a, then the ca107f210 dist refresh); the fifty-five commits since are all memory anchor-advances. Cadence: 2026-08-16 (23:13), 2026-08-17 (09:13), 2026-08-17 (23:17), then this run
+- No `serve.cjs` restarts since 2026-08-17 19:54 - `logs/` still 512 files, newest pair `error-347`/`out-347`
 
 ## Blockers
 None known
@@ -33,7 +33,7 @@ None known
 - Expo/React Native WebView wrapper (`app/`, untracked since 2026-04) loading https://interlink.unkndlabs.com
 
 ---
-Last memory update: 2026-08-17
-Commits covered through: 9d1a4fc90bbd777d7a0f15019e746ce7e601e6e7
+Last memory update: 2026-08-18
+Commits covered through: 19a4084fa2fa643aa91ebcd6add09e3abc7c25a3
 
-<!-- chinvex:last-commit:9d1a4fc90bbd777d7a0f15019e746ce7e601e6e7 -->
+<!-- chinvex:last-commit:19a4084fa2fa643aa91ebcd6add09e3abc7c25a3 -->
