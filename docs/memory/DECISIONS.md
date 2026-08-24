@@ -4,12 +4,21 @@
 # Decisions
 
 ## Recent (last 30 days)
+- Gitignored strap-generated lifecycle artifacts (`.strap/`, `start-*.cmd`, `stop-*.cmd`) so strap-managed runs don't dirty the working tree
 - Confirmed the `CLAUDE.md` corruption is a closed loop — the memory commit itself triggers the re-index that re-breaks the symlink; stopped restoring it per-run and left the source fix as the only real remedy
 - Traced the recurring `CLAUDE.md` symlink corruption to `strap map`'s unguarded hint append; restored the symlink, source fix still pending
 - Merged upstream Telegram Web A from v12.0.23 to v12.0.32 (Vite migration, Vitest migration, Settings/Profile/Left Panel redesigns)
 - Restored custom integrations (Fetch extraction, `serve.cjs`) after the upstream merge
 - Added main-folder-only mode: chat nav, folder UI, and notifications restricted to the "Main" Telegram folder, fail-closed
 - Added weekly automated upstream sync CI (`sync-upstream.yml`) that validates before pushing
+
+## 2026-08
+
+### 2026-08-23 — Gitignore strap-generated lifecycle artifacts
+
+- **Why:** `strap` writes lifecycle scaffolding into the repo root (`.strap/`, `start-*.cmd`, `stop-*.cmd`); untracked, they showed up in every `git status` and risked being swept into a `git add -A`.
+- **Impact:** `.gitignore` gained a "Strap-generated lifecycle artifacts" block with `.strap/`, `start-*.cmd`, `stop-*.cmd`. Interlink is now strap-managed with its lifecycle files excluded from version control. First non-memory commit since 2026-07-14.
+- **Evidence:** 114374540d2728179674534c3e76ddb699902815
 
 ## 2026-07
 

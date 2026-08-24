@@ -9,16 +9,16 @@ Maintain a custom fork of Telegram Web A (telegram-t) focused on a single "Main"
 ## Active Work
 - Main-only mode live: chat navigation, folder UI, and notifications (foreground + service worker) restricted to the "Main" Telegram folder, fail-closed if it's missing
 - Weekly automated upstream sync (`sync-upstream.yml`) merges Ajaxy/telegram-tt, validates (check+test+build), and pushes only on success
-- No source commits since 2026-07-14 (bc9f1a6ce/9d63b6e4a, then the ca107f210 dist refresh); the sixty-five commits since are all memory anchor-advances. Cadence: 2026-08-21 (23:14), 2026-08-22 (09:15), 2026-08-22 (23:14), then this run
-- `serve.cjs` restarted three more times overnight into 2026-08-23 (03:40, 04:23, 07:32) - `logs/` now 572 files, newest pair `error-694`/`out-694`
+- `.gitignore` now excludes strap lifecycle artifacts (`.strap/`, `start-*.cmd`, `stop-*.cmd`) — commit 114374540, the first non-memory commit since 2026-07-14
+- `serve.cjs` restarted six more times on 2026-08-23 (10:35, 11:21, 13:03, 14:00, 19:42, 20:07) — `logs/` now 584 files, newest pair `error-755`/`out-755`
 
 ## Blockers
 None known
 
 ## Next Actions
 - [ ] Fix the `CLAUDE.md` symlink corruption at the source - `strap map` appends the lookup hint with no symlink guard (`P:\software\_strap\modules\Commands\map.ps1:423`). It is a closed loop: committing memory triggers the re-index that re-breaks the link, so restoring here can never stick
-- [ ] Commit or gitignore the untracked chinvex index (`docs/sys/lookup.json`, current as of 2026-08-22 23:14) - `AGENTS.md` tells agents to read it; it is regenerated on every commit
-- [ ] Clean up stray untracked cruft: `logs/` (572 files), root file `8445`, `serve.js` duplicate, `.worktrees/loop-1783831370776-db43f9`
+- [ ] Commit or gitignore the untracked chinvex index (`docs/sys/lookup.json`) - `AGENTS.md` tells agents to read it; it is regenerated on every commit
+- [ ] Clean up stray untracked cruft: `logs/` (584 files), root file `8445`, `serve.js` duplicate, `.worktrees/loop-1783831370776-db43f9`
 - [ ] Confirm the SW notification allowlist (`setAllowedNotificationChatIds`) is posted correctly from `ChatFolders.tsx` on folder changes
 - [ ] Re-confirm Fetch extraction end-to-end through cloudflared tunnel post-Vite-migration
 
@@ -33,7 +33,7 @@ None known
 - Expo/React Native WebView wrapper (`app/`, untracked since 2026-04) loading https://interlink.unkndlabs.com
 
 ---
-Last memory update: 2026-08-23
-Commits covered through: dd42d655730184ec3bc0e6e7683ad6dd6259df66
+Last memory update: 2026-08-24
+Commits covered through: 114374540d2728179674534c3e76ddb699902815
 
-<!-- chinvex:last-commit:dd42d655730184ec3bc0e6e7683ad6dd6259df66 -->
+<!-- chinvex:last-commit:114374540d2728179674534c3e76ddb699902815 -->
