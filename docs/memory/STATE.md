@@ -10,7 +10,7 @@ Maintain a custom fork of Telegram Web A (telegram-t) focused on a single "Main"
 - Main-only mode live: chat navigation, folder UI, and notifications (foreground + service worker) restricted to the "Main" Telegram folder, fail-closed if it's missing
 - Weekly automated upstream sync (`sync-upstream.yml`) merges Ajaxy/telegram-tt, validates (check+test+build), and pushes only on success
 - `.gitignore` exclusion of strap lifecycle artifacts (`.strap/`, `start-*.cmd`, `stop-*.cmd`) is holding — none reappear in `git status` (commit 114374540)
-- `serve.cjs` restarted four more times (2026-08-24 09:53, 16:07, 22:33; 2026-08-25 04:17) — `logs/` now 602 files, all zero-byte; the restart counter **reset a second time** between 09:53 (813) and 16:07 (40), so newest pair is `error-136`/`out-136`
+- `serve.cjs` stable since 2026-08-25 04:17 — no restarts in the last ~19h; `logs/` holding at 602 zero-byte files, newest pair `error-136`/`out-136`
 
 ## Blockers
 None known
@@ -34,6 +34,6 @@ None known
 
 ---
 Last memory update: 2026-08-25
-Commits covered through: d043f461bc89d144133cd5ff54dcbf5bd4a6506b
+Commits covered through: 97b604e6baf906b06eb9726594912bc4051a339b
 
-<!-- chinvex:last-commit:d043f461bc89d144133cd5ff54dcbf5bd4a6506b -->
+<!-- chinvex:last-commit:97b604e6baf906b06eb9726594912bc4051a339b -->
