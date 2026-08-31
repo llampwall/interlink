@@ -10,8 +10,8 @@ Maintain a custom fork of Telegram Web A (telegram-t) focused on a single "Main"
 - Main-only mode live: chat navigation, folder UI, and notifications (foreground + service worker) restricted to the "Main" Telegram folder, fail-closed if it's missing
 - Weekly automated upstream sync (`sync-upstream.yml`) merges Ajaxy/telegram-tt, validates (check+test+build), and pushes only on success
 - `.gitignore` exclusion of strap lifecycle artifacts (`.strap/`, `start-*.cmd`, `stop-*.cmd`) is holding — none reappear in `git status` (commit 114374540)
-- `serve.cjs` restart bursts continuing through 2026-08-29 — `logs/` at 622 files, newest pair `error-328`/`out-328` (2026-08-29 13:31)
-- Live on port 8445 via the strap shim `P:\software\bin\interlink.exe serve.cjs` (PID 26120, started 2026-08-29 18:59) — not a bare `node.exe`
+- `serve.cjs` restart bursts continuing — `logs/` at 630 files; 4 restarts on 2026-08-30 (03:54, 05:08, 08:21, 13:44), newest pair `error-101`/`out-101`
+- Live on port 8445 via the strap shim `P:\software\bin\interlink.exe serve.cjs` (PID 78424, started 2026-08-30 21:30) — not a bare `node.exe`
 
 ## Blockers
 None known
@@ -19,7 +19,7 @@ None known
 ## Next Actions
 - [ ] Fix the `CLAUDE.md` symlink corruption at the source - `strap map` appends the lookup hint with no symlink guard (`P:\software\_strap\modules\Commands\map.ps1:423`). It is a closed loop: committing memory triggers the re-index that re-breaks the link, so restoring here can never stick
 - [ ] Commit or gitignore the untracked chinvex index (`docs/sys/lookup.json`) - `AGENTS.md` tells agents to read it; it is regenerated on every commit
-- [ ] Clean up stray untracked cruft: `logs/` (622 files), root file `8445`, `serve.js` duplicate, `.worktrees/loop-1783831370776-db43f9`
+- [ ] Clean up stray untracked cruft: `logs/` (630 files), root file `8445`, `serve.js` duplicate, `.worktrees/loop-1783831370776-db43f9`
 - [ ] Confirm the SW notification allowlist (`setAllowedNotificationChatIds`) is posted correctly from `ChatFolders.tsx` on folder changes
 - [ ] Re-confirm Fetch extraction end-to-end through cloudflared tunnel post-Vite-migration
 
@@ -35,6 +35,6 @@ None known
 
 ---
 Last memory update: 2026-08-30
-Commits covered through: 5217818314ede6ce301ae76debe138218c9829f3
+Commits covered through: aa9b6e2523d725974a8781f150f6183e712d8470
 
-<!-- chinvex:last-commit:5217818314ede6ce301ae76debe138218c9829f3 -->
+<!-- chinvex:last-commit:aa9b6e2523d725974a8781f150f6183e712d8470 -->
