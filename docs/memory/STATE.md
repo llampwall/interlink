@@ -9,17 +9,17 @@ Maintain a custom fork of Telegram Web A (telegram-t) focused on a single "Main"
 ## Active Work
 - Main-only mode live: chat navigation, folder UI, and notifications (foreground + service worker) restricted to the "Main" Telegram folder, fail-closed if it's missing
 - Weekly automated upstream sync (`sync-upstream.yml`) merges Ajaxy/telegram-tt, validates (check+test+build), and pushes only on success
-- `.gitignore` now also excludes `docs/sys/lookup.json` and `.chinvex-status.json` — committed this run, so the chinvex index no longer dirties `git status`
-- `serve.cjs` restart bursts intensified — 15 logged restarts on 2026-09-01 (00:23 → 21:32), `logs/` at 668 files / 1.3 MB, counter 218 → 461
-- Live on port 8445 via the strap shim `P:\software\bin\interlink.exe serve.cjs` (PID 79188, started 2026-09-01 21:32:55, log pair `error-461`/`out-461`)
+- `.gitignore` excludes `docs/sys/lookup.json` and `.chinvex-status.json`, so the chinvex index no longer dirties `git status`
+- `serve.cjs` restarts continuing but slower — 1 since the 2026-09-01 burst of 15, at 2026-09-02 02:17; `logs/` at 670 files / 1.3 MB, counter 461 → 470
+- Live on port 8445 via the strap shim `P:\software\bin\interlink.exe serve.cjs` (PID 76436, started 2026-09-02 02:17:46, log pair `error-470`/`out-470`)
 
 ## Blockers
 None known
 
 ## Next Actions
 - [ ] Fix the `CLAUDE.md` symlink corruption at the source - `strap map` appends the lookup hint with no symlink guard (`P:\software\_strap\modules\Commands\map.ps1:423`). It is a closed loop: committing memory triggers the re-index that re-breaks the link, so restoring here can never stick
-- [ ] Investigate why `serve.cjs` restarts 15×/day — no error content in the logs (all recent pairs are zero-byte), so the trigger is outside the app
-- [ ] Clean up stray untracked cruft: `logs/` (668 files), root file `8445`, `serve.js` duplicate, `.worktrees/loop-1783831370776-db43f9`
+- [ ] Investigate why `serve.cjs` restarts in bursts (15 on 2026-09-01, 1 on 2026-09-02) — no error content in the logs (all recent pairs are zero-byte), so the trigger is outside the app
+- [ ] Clean up stray untracked cruft: `logs/` (670 files), root file `8445`, `serve.js` duplicate, `.worktrees/loop-1783831370776-db43f9`
 - [ ] Confirm the SW notification allowlist (`setAllowedNotificationChatIds`) is posted correctly from `ChatFolders.tsx` on folder changes
 - [ ] Re-confirm Fetch extraction end-to-end through cloudflared tunnel post-Vite-migration
 
@@ -35,6 +35,6 @@ None known
 
 ---
 Last memory update: 2026-09-02
-Commits covered through: 97dd3364c16d50fe3691b52f95affd697b73818a
+Commits covered through: dc31b3bb6ce008d569fa97199528ae908ec1c42b
 
-<!-- chinvex:last-commit:97dd3364c16d50fe3691b52f95affd697b73818a -->
+<!-- chinvex:last-commit:dc31b3bb6ce008d569fa97199528ae908ec1c42b -->
