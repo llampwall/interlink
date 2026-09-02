@@ -16,3 +16,5 @@ dev/perf/screenshot*
 .strap/
 start-*.cmd
 stop-*.cmd
+docs/sys/lookup.json
+.chinvex-status.json
