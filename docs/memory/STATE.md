@@ -9,17 +9,17 @@ Maintain a custom fork of Telegram Web A (telegram-t) focused on a single "Main"
 ## Active Work
 - Main-only mode live: chat navigation, folder UI, and notifications (foreground + service worker) restricted to the "Main" Telegram folder, fail-closed if it's missing
 - Weekly automated upstream sync (`sync-upstream.yml`) merges Ajaxy/telegram-tt, validates (check+test+build), and pushes only on success
-- No code changes since 2026-08-24 — the last eight commits are gitignore and memory updates
-- `serve.cjs` stable: PID 112712 (started 2026-09-05 10:34:23) still owns port 8445, HTTP 200, ~30h uptime. `logs/` unchanged at 704 files / 1.31 MB, newest pair frozen at 2026-09-03 09:38
+- No code changes since 2026-08-24 — the last nine commits are gitignore and memory updates
+- `serve.cjs` restarted twice on 2026-09-06 (21:03:06, then 22:19:55). Current PID 138184 owns port 8445, HTTP 200, ~8h uptime. Log-pair writing resumed after a 3-day gap: `logs/` now 708 files / 1.35 MB, newest pair `error-111`/`out-111`, both zero-byte
 
 ## Blockers
 None known
 
 ## Next Actions
 - [ ] Fix the `CLAUDE.md` symlink corruption at the source - `strap map` appends the lookup hint with no symlink guard (`P:\software\_strap\modules\Commands\map.ps1:423`). It is a closed loop: committing memory triggers the re-index that re-breaks the link, so restoring here can never stick
-- [ ] Investigate why `serve.cjs` restarts (15 on 2026-09-01, 13 on 2026-09-02, 4 on 2026-09-03, 2 on 2026-09-05) — logs are zero-byte or absent, so the trigger is outside the app
-- [ ] Decide whether log-pair writing is worth repairing — the last four starts left no trace, so `logs/` is no longer a usable restart record
-- [ ] Clean up stray untracked cruft: `logs/` (704 files), root file `8445`, `serve.js` duplicate, `.worktrees/loop-1783831370776-db43f9`
+- [ ] Investigate why `serve.cjs` restarts (15 on 2026-09-01, 13 on 2026-09-02, 4 on 2026-09-03, 2 on 2026-09-05, 2 on 2026-09-06) — every pair is zero-byte, so the trigger is outside the app
+- [ ] Make the restart trigger observable — capture stdout/stderr somewhere non-empty, since zero-byte pairs record only the timestamp
+- [ ] Clean up stray untracked cruft: `logs/` (708 files), root file `8445`, `serve.js` duplicate, `.worktrees/loop-1783831370776-db43f9`
 - [ ] Re-confirm Fetch extraction end-to-end through cloudflared tunnel post-Vite-migration
 
 ## Quick Reference
@@ -33,7 +33,7 @@ None known
 - Expo/React Native WebView wrapper (`app/`, untracked since 2026-04) loading https://interlink.unkndlabs.com
 
 ---
-Last memory update: 2026-09-06
-Commits covered through: e6570b44b82ca49f0b4900d018b88ed050c5f370
+Last memory update: 2026-09-07
+Commits covered through: 5b53209acf99034f206b3dbc997b146a41eb33bb
 
-<!-- chinvex:last-commit:e6570b44b82ca49f0b4900d018b88ed050c5f370 -->
+<!-- chinvex:last-commit:5b53209acf99034f206b3dbc997b146a41eb33bb -->
