@@ -9,17 +9,17 @@ Maintain a custom fork of Telegram Web A (telegram-t) focused on a single "Main"
 ## Active Work
 - Main-only mode live: chat navigation, folder UI, and notifications (foreground + service worker) restricted to the "Main" Telegram folder, fail-closed if it's missing
 - Weekly automated upstream sync (`sync-upstream.yml`) merges Ajaxy/telegram-tt, validates (check+test+build), and pushes only on success
-- No code changes since 2026-08-24 — the last nine commits are gitignore and memory updates
-- `serve.cjs` restarted twice on 2026-09-06 (21:03:06, then 22:19:55). Current PID 138184 owns port 8445, HTTP 200, ~8h uptime. Log-pair writing resumed after a 3-day gap: `logs/` now 708 files / 1.35 MB, newest pair `error-111`/`out-111`, both zero-byte
+- No code changes since 2026-08-24 — the last ten commits are gitignore and memory updates
+- `serve.cjs` restarted twice on 2026-09-07 (01:42:41 wrote pair `error-135`/`out-135`; 07:56:05 wrote none). Current PID 112496 owns port 8445, HTTP 200, ~1.3h uptime. `logs/` now 710 files / 1.31 MB
 
 ## Blockers
 None known
 
 ## Next Actions
 - [ ] Fix the `CLAUDE.md` symlink corruption at the source - `strap map` appends the lookup hint with no symlink guard (`P:\software\_strap\modules\Commands\map.ps1:423`). It is a closed loop: committing memory triggers the re-index that re-breaks the link, so restoring here can never stick
-- [ ] Investigate why `serve.cjs` restarts (15 on 2026-09-01, 13 on 2026-09-02, 4 on 2026-09-03, 2 on 2026-09-05, 2 on 2026-09-06) — every pair is zero-byte, so the trigger is outside the app
+- [ ] Investigate why `serve.cjs` restarts (15 on 2026-09-01, 13 on 2026-09-02, 4 on 2026-09-03, 2 on 2026-09-05, 2 on 2026-09-06, 2 on 2026-09-07) — every pair is zero-byte, so the trigger is outside the app
 - [ ] Make the restart trigger observable — capture stdout/stderr somewhere non-empty, since zero-byte pairs record only the timestamp
-- [ ] Clean up stray untracked cruft: `logs/` (708 files), root file `8445`, `serve.js` duplicate, `.worktrees/loop-1783831370776-db43f9`
+- [ ] Clean up stray untracked cruft: `logs/` (710 files), root file `8445`, `serve.js` duplicate, `.worktrees/loop-1783831370776-db43f9`
 - [ ] Re-confirm Fetch extraction end-to-end through cloudflared tunnel post-Vite-migration
 
 ## Quick Reference
@@ -34,6 +34,6 @@ None known
 
 ---
 Last memory update: 2026-09-07
-Commits covered through: 5b53209acf99034f206b3dbc997b146a41eb33bb
+Commits covered through: 0dd069088e9fb880889bad6e04f3453fa01727da
 
-<!-- chinvex:last-commit:5b53209acf99034f206b3dbc997b146a41eb33bb -->
+<!-- chinvex:last-commit:0dd069088e9fb880889bad6e04f3453fa01727da -->
