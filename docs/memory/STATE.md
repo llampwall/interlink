@@ -10,7 +10,7 @@ Maintain a custom fork of Telegram Web A (telegram-t) focused on a single "Main"
 - Main-only mode live: chat navigation, folder UI, and notifications (foreground + service worker) restricted to the "Main" Telegram folder, fail-closed if it's missing
 - Weekly automated upstream sync (`sync-upstream.yml`) merges Ajaxy/telegram-tt, validates (check+test+build), and pushes only on success
 - No code changes since 2026-08-24 — the last ten commits are gitignore and memory updates
-- `serve.cjs` restarted twice on 2026-09-19 (00:46:55, 02:27:00) after PID 42612's record ~79h hold; current owner PID 45064, ~6.8h in. The third silent stretch ended at ~110h — `logs/` now 724 files / 1,378,555 bytes, newest pair `error-86`/`out-86` (zero-byte, 2026-09-19 02:27:00)
+- `serve.cjs` restarted twice on 2026-09-19 (00:46:55, 02:27:00) after PID 42612's record ~79h hold; current owner PID 45064 has held quietly since, ~20.8h in. `logs/` unchanged at 724 files / 1,378,555 bytes, newest pair `error-86`/`out-86` (zero-byte, 2026-09-19 02:27:00)
 
 ## Blockers
 None known
@@ -34,6 +34,6 @@ None known
 
 ---
 Last memory update: 2026-09-19
-Commits covered through: 23413898180bf65499ad2d809c78a8ac83cd7840
+Commits covered through: 4fbe9231af4ce5e92b1ad8544ebf34bde4c9279f
 
-<!-- chinvex:last-commit:23413898180bf65499ad2d809c78a8ac83cd7840 -->
+<!-- chinvex:last-commit:4fbe9231af4ce5e92b1ad8544ebf34bde4c9279f -->
