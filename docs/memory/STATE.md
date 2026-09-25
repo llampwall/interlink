@@ -10,8 +10,8 @@ Maintain a custom fork of Telegram Web A (telegram-t) focused on a single "Main"
 - Main-only mode live: chat navigation, folder UI, and notifications (foreground + service worker) restricted to the "Main" Telegram folder, fail-closed if it's missing
 - Weekly automated upstream sync (`sync-upstream.yml`) merges Ajaxy/telegram-tt, validates (check+test+build), and pushes only on success
 - No code changes since 2026-08-24 — the last ten commits are gitignore and memory updates
-- `serve.cjs` owner rolled again: PID 73636 held ~3.2h, current owner PID 47552 started 2026-09-23 23:27:38, confirmed listening on 8445 as process `interlink`. Restart wrote no log pair
-- New in `logs/`: an external rotator fired at 2026-09-24 00:00:05, rotating the July `out-128.log` into `out-128__2026-09-24_00-00-05.log` (114 bytes) and truncating the original. 725 files, total still 1,378,555 bytes; newest by mtime is now the `out-128` pair, not `error-86`/`out-86`
+- `serve.cjs` owner unchanged: PID 47552 (started 2026-09-23 23:27:38) still listening on 8445 as process `interlink`, ~23.8h in — the post-burst hold is approaching the ~25-36h band
+- `logs/` unchanged since the 2026-09-24 00:00:05 rotation: 725 files, 1,378,555 bytes, newest by mtime still the `out-128` pair. No genuine restart pair since 2026-09-19 02:27
 
 ## Blockers
 None known
@@ -35,6 +35,6 @@ None known
 
 ---
 Last memory update: 2026-09-24
-Commits covered through: 5a6b71867194d1d86455d36f42e66af5f45689b0
+Commits covered through: 42a641857c37a2cbf71ee893b5878a36e66ca915
 
-<!-- chinvex:last-commit:5a6b71867194d1d86455d36f42e66af5f45689b0 -->
+<!-- chinvex:last-commit:42a641857c37a2cbf71ee893b5878a36e66ca915 -->
