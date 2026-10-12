@@ -10,7 +10,7 @@ Maintain a custom fork of Telegram Web A (telegram-t) focused on a single "Main"
 - Main-only mode live: chat navigation, folder UI, and notifications (foreground + service worker) restricted to the "Main" Telegram folder, fail-closed if it's missing
 - Weekly automated upstream sync (`sync-upstream.yml`) merges Ajaxy/telegram-tt, validates (check+test+build), and pushes only on success
 - No code changes since 2026-08-24; the last twenty commits are gitignore and memory updates
-- `serve.cjs` owner on 8445 is PID 106724 (`P:\software\bin\interlink.exe`, started 2026-10-06 19:23:24, no log pair written); PID 67736 started 10-05 16:50:00
+- `serve.cjs` owner on 8445 is PID 106724 (`P:\software\bin\interlink.exe`, started 2026-10-06 19:23:24, no log pair written, still running 2026-10-12)
 - `logs/`: 736 files, 1,378,555 bytes; newest restart pairs are zero-byte `*-161.log` (10-03 17:05:53) and `*-169.log` (10-03 17:25:29), numbered below the older `*-252.log`, so suffixes are not monotonic. Midnight rotation (09-24, 09-27, 09-28, 10-02) hits stale files and says nothing about restarts
 
 ## Blockers
@@ -34,7 +34,7 @@ None known
 - Expo/React Native WebView wrapper (`app/`, untracked since 2026-04) loading https://interlink.unkndlabs.com
 
 ---
-Last memory update: 2026-10-11
-Commits covered through: 3e6ae109030b5663aeee084124edf92e87294858
+Last memory update: 2026-10-12
+Commits covered through: 77fd8c61221fcb72bcabd3a4c52b23d41b598877
 
-<!-- chinvex:last-commit:3e6ae109030b5663aeee084124edf92e87294858 -->
+<!-- chinvex:last-commit:77fd8c61221fcb72bcabd3a4c52b23d41b598877 -->
