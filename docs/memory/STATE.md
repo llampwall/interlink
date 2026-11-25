@@ -34,7 +34,7 @@ None known
 - Expo/React Native WebView wrapper (`app/`, untracked since 2026-04) loading https://interlink.unkndlabs.com
 
 ---
-Last memory update: 2026-11-24
-Commits covered through: a1c1fb32b236aabe9946030c93d2862aafb5afcd
+Last memory update: 2026-11-25
+Commits covered through: af0be79de45d90ca7679ecac159be06ed5a42b65
 
-<!-- chinvex:last-commit:a1c1fb32b236aabe9946030c93d2862aafb5afcd -->
+<!-- chinvex:last-commit:af0be79de45d90ca7679ecac159be06ed5a42b65 -->
